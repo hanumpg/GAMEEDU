@@ -1,0 +1,2984 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Petualangan Dunia Fonologi</title>
+    <style>
+        /* ==========================================================================
+           1. VARIABEL TEMA & RESET DASAR (PASTEL CERIA ANAK SD)
+           ========================================================================== */
+        :root {
+            --bg-sky: #E0F7FA;
+            --bg-mint: #E8F5E9;
+            --bg-cream: #FFFDE7;
+            --pastel-pink: #FF80AB;
+            --pastel-pink-dark: #F50057;
+            --pastel-blue: #4FC3F7;
+            --pastel-blue-dark: #0288D1;
+            --pastel-yellow: #FFD54F;
+            --pastel-yellow-dark: #FFA000;
+            --pastel-purple: #BA68C8;
+            --pastel-purple-dark: #7B1FA2;
+            --pastel-green: #81C784;
+            --pastel-green-dark: #388E3C;
+            --pastel-orange: #FFB74D;
+            --text-dark: #2C3E50;
+            --text-muted: #546E7A;
+            --white: #FFFFFF;
+            --shadow-soft: 0 8px 20px rgba(44, 62, 80, 0.12);
+            --shadow-btn: 0 6px 0 rgba(0, 0, 0, 0.18);
+            --font-kid: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', 'Trebuchet MS', system-ui, -apple-system, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: var(--font-kid);
+            color: var(--text-dark);
+            background: linear-gradient(135deg, #E1F5FE 0%, #FCE4EC 35%, #FFF9C4 70%, #E8F5E9 100%);
+            background-size: 400% 400%;
+            animation: gradientBG 18s ease infinite;
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Dekorasi Awan & Bintang Mengambang di Latar */
+        .bg-decorations {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .floating-shape {
+            position: absolute;
+            opacity: 0.45;
+            animation: floatSlow 12s infinite ease-in-out;
+        }
+
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(8deg); }
+        }
+
+        /* ==========================================================================
+           2. TOP BAR / NAVIGASI KONSISTEN
+           ========================================================================== */
+        .top-navbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(8px);
+            border-bottom: 4px solid var(--pastel-blue);
+            padding: 8px 14px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .brand-mini {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 900;
+            font-size: 1.05rem;
+            color: var(--pastel-purple-dark);
+            cursor: pointer;
+        }
+
+        .nav-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-btn {
+            background: #F1F8E9;
+            border: 2px solid #AED581;
+            color: var(--text-dark);
+            padding: 6px 10px;
+            border-radius: 14px;
+            font-family: inherit;
+            font-weight: 800;
+            font-size: 0.82rem;
+            cursor: pointer;
+            transition: transform 0.15s, background 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            background: #DCEDC8;
+        }
+
+        .nav-btn.active {
+            background: var(--pastel-yellow);
+            border-color: var(--pastel-yellow-dark);
+            color: #3E2723;
+        }
+
+        .hud-stats {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat-pill {
+            background: #FFF8E1;
+            border: 2px solid var(--pastel-yellow-dark);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 900;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: #E65100;
+        }
+
+        .stat-pill.coin {
+            background: #E1F5FE;
+            border-color: var(--pastel-blue-dark);
+            color: #01579B;
+        }
+
+        /* ==========================================================================
+           3. KONTAINER UTAMA & SISTEM HALAMAN (VIEWS)
+           ========================================================================== */
+        .app-container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: 16px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .screen {
+            display: none;
+            animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            width: 100%;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes popIn {
+            0% { opacity: 0; transform: scale(0.95) translateY(10px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        /* ==========================================================================
+           4. TOMBOL KARTUN BESAR & KARTU
+           ========================================================================== */
+        .btn-kid {
+            border: none;
+            border-radius: 22px;
+            padding: 14px 24px;
+            font-family: inherit;
+            font-size: 1.1rem;
+            font-weight: 900;
+            color: var(--white);
+            cursor: pointer;
+            box-shadow: var(--shadow-btn);
+            transition: transform 0.12s, box-shadow 0.12s, filter 0.15s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.25);
+        }
+
+        .btn-kid:hover {
+            transform: translateY(-3px);
+            filter: brightness(1.05);
+        }
+
+        .btn-kid:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-pink { background: linear-gradient(180deg, #FF80AB, #F50057); }
+        .btn-blue { background: linear-gradient(180deg, #4FC3F7, #0288D1); }
+        .btn-green { background: linear-gradient(180deg, #81C784, #388E3C); }
+        .btn-yellow { background: linear-gradient(180deg, #FFD54F, #FFA000); color: #3E2723; text-shadow: none; }
+        .btn-purple { background: linear-gradient(180deg, #BA68C8, #7B1FA2); }
+        .btn-orange { background: linear-gradient(180deg, #FFB74D, #F57C00); }
+
+        .card-box {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 28px;
+            border: 4px solid var(--pastel-blue);
+            box-shadow: var(--shadow-soft);
+            padding: 22px;
+        }
+
+        /* ==========================================================================
+           5. HALAMAN PEMBUKA (BERANDA)
+           ========================================================================== */
+        .hero-box {
+            text-align: center;
+            background: linear-gradient(180deg, #FFFFFF 0%, #FFFDE7 100%);
+            border: 5px solid var(--pastel-yellow);
+            border-radius: 34px;
+            padding: 28px 20px;
+            box-shadow: var(--shadow-soft);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-title {
+            font-size: clamp(1.9rem, 5vw, 3.2rem);
+            font-weight: 900;
+            color: var(--pastel-pink-dark);
+            text-shadow: 3px 3px 0 #FFD54F, 5px 5px 0 rgba(0,0,0,0.08);
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+            line-height: 1.15;
+        }
+
+        .game-tagline {
+            display: inline-block;
+            background: var(--pastel-blue);
+            color: white;
+            font-weight: 800;
+            font-size: clamp(0.95rem, 2.5vw, 1.2rem);
+            padding: 8px 20px;
+            border-radius: 30px;
+            margin-bottom: 18px;
+            box-shadow: 0 4px 0 var(--pastel-blue-dark);
+        }
+
+        .detective-mascot-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 10px auto 18px;
+        }
+
+        .mascot-bounce {
+            animation: mascotBob 2.4s ease-in-out infinite;
+        }
+
+        @keyframes mascotBob {
+            0%, 100% { transform: translateY(0) rotate(-2deg); }
+            50% { transform: translateY(-10px) rotate(2deg); }
+        }
+
+        .speech-bubble {
+            background: #E1F5FE;
+            border: 3px solid var(--pastel-blue-dark);
+            border-radius: 22px;
+            padding: 14px 22px;
+            max-width: 620px;
+            font-size: 1.12rem;
+            font-weight: 800;
+            color: #01579B;
+            position: relative;
+            margin-top: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+        }
+
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 14px;
+            margin-top: 20px;
+        }
+
+        .btn-start-huge {
+            font-size: 1.35rem;
+            padding: 18px 34px;
+            border-radius: 28px;
+            animation: pulseBtn 2s infinite;
+        }
+
+        @keyframes pulseBtn {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.04); }
+        }
+
+        /* ==========================================================================
+           6. HALAMAN MENU UTAMA (3 KARTU GAME)
+           ========================================================================== */
+        .menu-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .menu-header h2 {
+            font-size: 2rem;
+            color: var(--pastel-purple-dark);
+            text-shadow: 2px 2px 0 #FFF;
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+            gap: 20px;
+        }
+
+        .game-card {
+            background: white;
+            border-radius: 28px;
+            padding: 22px;
+            text-align: center;
+            border: 5px solid var(--pastel-pink);
+            box-shadow: var(--shadow-soft);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.2s;
+        }
+
+        .game-card:hover {
+            transform: translateY(-6px);
+        }
+
+        .game-card.card-mall { border-color: var(--pastel-blue); }
+        .game-card.card-puzzle { border-color: var(--pastel-green); }
+
+        .game-card-badge {
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: 16px;
+            font-weight: 900;
+            font-size: 0.85rem;
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .game-card h3 {
+            font-size: 1.45rem;
+            margin: 10px 0 8px;
+            color: var(--text-dark);
+        }
+
+        .game-card p {
+            font-size: 1rem;
+            color: var(--text-muted);
+            line-height: 1.45;
+            margin-bottom: 16px;
+        }
+
+        .card-progress-pill {
+            background: #F5F5F5;
+            border-radius: 14px;
+            padding: 6px 12px;
+            font-size: 0.88rem;
+            font-weight: 800;
+            margin-bottom: 14px;
+            color: #455A64;
+        }
+
+        /* ==========================================================================
+           7. GAME 1: MISI DETEKTIF FONOLOGI
+           ========================================================================== */
+        .detective-header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            background: white;
+            padding: 14px 18px;
+            border-radius: 22px;
+            border: 4px solid var(--pastel-pink);
+            margin-bottom: 16px;
+        }
+
+        .level-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .lvl-badge {
+            padding: 6px 12px;
+            border-radius: 14px;
+            font-size: 0.82rem;
+            font-weight: 900;
+            background: #FCE4EC;
+            color: #880E4F;
+            border: 2px solid #F48FB1;
+        }
+
+        .lvl-badge.current {
+            background: var(--pastel-pink-dark);
+            color: white;
+            border-color: #AD1457;
+            transform: scale(1.05);
+        }
+
+        .progress-bar-outer {
+            width: 100%;
+            height: 16px;
+            background: #ECEFF1;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 8px;
+            border: 2px solid #CFD8DC;
+        }
+
+        .progress-bar-inner {
+            height: 100%;
+            background: linear-gradient(90deg, #FF80AB, #FFD54F, #81C784);
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        .detective-stage {
+            background: white;
+            border-radius: 28px;
+            border: 5px solid var(--pastel-purple);
+            padding: 22px;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .word-showcase {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 16px;
+            margin: 16px 0;
+        }
+
+        .word-card-big {
+            background: linear-gradient(180deg, #FFF9C4, #FFE082);
+            border: 4px solid #FFA000;
+            border-radius: 22px;
+            padding: 16px 28px;
+            font-size: clamp(1.8rem, 4vw, 2.6rem);
+            font-weight: 900;
+            color: #3E2723;
+            letter-spacing: 4px;
+            box-shadow: 0 5px 0 #FF8F00;
+        }
+
+        .question-text {
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: 900;
+            color: var(--pastel-purple-dark);
+            margin: 14px 0 18px;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .option-btn {
+            background: #F3E5F5;
+            border: 3px solid #CE93D8;
+            border-radius: 20px;
+            padding: 16px;
+            font-family: inherit;
+            font-size: 1.12rem;
+            font-weight: 900;
+            color: #4A148C;
+            cursor: pointer;
+            transition: all 0.15s;
+            box-shadow: 0 4px 0 #BA68C8;
+        }
+
+        .option-btn:hover {
+            background: #E1BEE7;
+            transform: translateY(-2px);
+        }
+
+        .option-btn.correct {
+            background: #C8E6C9;
+            border-color: #2E7D32;
+            color: #1B5E20;
+            box-shadow: 0 4px 0 #2E7D32;
+        }
+
+        .option-btn.wrong {
+            background: #FFCDD2;
+            border-color: #C62828;
+            color: #B71C1C;
+            animation: shakeAnim 0.4s;
+        }
+
+        @keyframes shakeAnim {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+
+        /* Susun Kata Level 5 */
+        .scramble-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            margin: 16px 0;
+        }
+
+        .answer-slots, .letter-pool {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            min-height: 64px;
+            padding: 10px;
+            border-radius: 18px;
+        }
+
+        .answer-slots {
+            background: #E1F5FE;
+            border: 3px dashed #0288D1;
+            min-width: 260px;
+        }
+
+        .letter-tile {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            background: linear-gradient(180deg, #FFD54F, #FFB300);
+            border: 3px solid #E65100;
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: #3E2723;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #E65100;
+            transition: transform 0.12s;
+        }
+
+        .letter-tile:hover { transform: scale(1.08); }
+        .letter-tile.used { opacity: 0.3; pointer-events: none; }
+
+        .feedback-banner {
+            border-radius: 20px;
+            padding: 16px;
+            margin-top: 14px;
+            font-weight: 800;
+            font-size: 1.05rem;
+            display: none;
+            animation: popIn 0.3s;
+        }
+
+        .feedback-banner.success {
+            display: block;
+            background: #E8F5E9;
+            border: 3px solid #4CAF50;
+            color: #1B5E20;
+        }
+
+        .feedback-banner.retry {
+            display: block;
+            background: #FFF3E0;
+            border: 3px solid #FF9800;
+            color: #E65100;
+        }
+
+        .hint-box {
+            background: #FFFDE7;
+            border: 2px dashed #FBC02D;
+            border-radius: 16px;
+            padding: 10px 16px;
+            margin-top: 10px;
+            font-weight: 700;
+            color: #5D4037;
+            display: none;
+        }
+
+        /* ==========================================================================
+           8. GAME 2: HAPPY PHONOLOGY MALL (GAME SIMULASI TOP-DOWN 2D)
+           ========================================================================== */
+        .mall-wrapper {
+            background: white;
+            border-radius: 28px;
+            border: 5px solid var(--pastel-blue);
+            padding: 16px;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .mall-topbar {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            background: #E1F5FE;
+            padding: 10px 16px;
+            border-radius: 18px;
+        }
+
+        .mall-canvas-container {
+            position: relative;
+            width: 100%;
+            max-width: 860px;
+            margin: 0 auto;
+            border-radius: 22px;
+            overflow: hidden;
+            border: 4px solid #0288D1;
+            background: #FFF8E1;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.08);
+        }
+
+        #mallCanvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            aspect-ratio: 16 / 10;
+            touch-action: none;
+        }
+
+        .mall-interact-overlay {
+            position: absolute;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            display: none;
+            animation: popIn 0.25s;
+        }
+
+        .mall-controls-area {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-top: 14px;
+            padding: 10px;
+            background: #F5F5F5;
+            border-radius: 20px;
+        }
+
+        .dpad-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 58px);
+            grid-template-rows: repeat(2, 54px);
+            gap: 6px;
+            margin: 0 auto;
+        }
+
+        .dpad-btn {
+            background: linear-gradient(180deg, #4FC3F7, #0288D1);
+            border: none;
+            border-radius: 16px;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 900;
+            box-shadow: 0 4px 0 #01579B;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            touch-action: manipulation;
+        }
+
+        .dpad-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #01579B;
+        }
+
+        .shop-status-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: center;
+            flex: 1;
+        }
+
+        .shop-chip {
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 800;
+            background: #ECEFF1;
+            border: 2px solid #CFD8DC;
+            color: #455A64;
+        }
+
+        .shop-chip.done {
+            background: #C8E6C9;
+            border-color: #4CAF50;
+            color: #1B5E20;
+        }
+
+        /* ==========================================================================
+           9. GAME 3: PUZZLE DUNIA KATA
+           ========================================================================== */
+        .puzzle-wrapper {
+            background: white;
+            border-radius: 28px;
+            border: 5px solid var(--pastel-green);
+            padding: 20px;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .puzzle-controls-bar {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            background: #E8F5E9;
+            padding: 12px 16px;
+            border-radius: 18px;
+            margin-bottom: 16px;
+        }
+
+        .puzzle-select {
+            padding: 8px 14px;
+            border-radius: 14px;
+            border: 3px solid #66BB6A;
+            font-family: inherit;
+            font-weight: 800;
+            font-size: 0.95rem;
+            background: white;
+            color: var(--text-dark);
+        }
+
+        .puzzle-play-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .puzzle-target-banner {
+            background: #FFF9C4;
+            border: 3px solid #FBC02D;
+            padding: 10px 24px;
+            border-radius: 20px;
+            font-size: 1.35rem;
+            font-weight: 900;
+            color: #E65100;
+        }
+
+        .puzzle-board {
+            display: grid;
+            gap: 6px;
+            background: #CFD8DC;
+            padding: 10px;
+            border-radius: 22px;
+            border: 4px solid #78909C;
+            width: 100%;
+            max-width: 380px;
+            aspect-ratio: 1 / 1;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .puzzle-piece {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 3px solid white;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+            transition: transform 0.15s, border-color 0.15s;
+            background-color: #FFFDE7;
+        }
+
+        .puzzle-piece:hover {
+            transform: scale(1.03);
+        }
+
+        .puzzle-piece.selected {
+            border-color: #FF1744;
+            transform: scale(1.06);
+            box-shadow: 0 0 0 4px rgba(255, 23, 68, 0.35);
+            z-index: 2;
+        }
+
+        .puzzle-piece.solved-piece {
+            border-color: #4CAF50;
+            cursor: default;
+        }
+
+        /* ==========================================================================
+           10. HALAMAN MATERI & HASIL AKHIR
+           ========================================================================== */
+        .materi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .materi-card {
+            background: white;
+            border-radius: 22px;
+            padding: 18px;
+            border: 4px solid var(--pastel-yellow);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        }
+
+        .materi-card h4 {
+            font-size: 1.2rem;
+            color: var(--pastel-pink-dark);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .materi-card p {
+            font-size: 0.98rem;
+            line-height: 1.5;
+            color: var(--text-dark);
+        }
+
+        .materi-example {
+            margin-top: 8px;
+            background: #E1F5FE;
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: #01579B;
+        }
+
+        /* ==========================================================================
+           11. MODAL POPUP (TOKO MALL, PETUNJUK, PROFIL, AUDIO, CELEBRATION)
+           ========================================================================== */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(38, 50, 56, 0.65);
+            backdrop-filter: blur(4px);
+            z-index: 999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .modal-backdrop.open {
+            display: flex;
+            animation: fadeIn 0.2s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-card {
+            background: white;
+            border-radius: 30px;
+            border: 5px solid var(--pastel-yellow);
+            max-width: 580px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 24px;
+            position: relative;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+            animation: popIn 0.3s;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: #FFCDD2;
+            color: #B71C1C;
+            font-size: 1.3rem;
+            font-weight: 900;
+            cursor: pointer;
+        }
+
+        /* ==========================================================================
+           12. PARTIKEL BINTANG & KONFETI ANIMASI
+           ========================================================================== */
+        .fx-layer {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 2000;
+            overflow: hidden;
+        }
+
+        .confetti-piece {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            top: -20px;
+            border-radius: 3px;
+            animation: confettiFall linear forwards;
+        }
+
+        @keyframes confettiFall {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(105vh) rotate(720deg); opacity: 0; }
+        }
+
+        .star-burst {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 4rem;
+            animation: starPop 0.9s ease-out forwards;
+            pointer-events: none;
+            z-index: 2100;
+        }
+
+        @keyframes starPop {
+            0% { transform: translate(-50%, -50%) scale(0.2) rotate(0deg); opacity: 1; }
+            60% { transform: translate(-50%, -80%) scale(1.4) rotate(180deg); opacity: 1; }
+            100% { transform: translate(-50%, -120%) scale(0.8) rotate(360deg); opacity: 0; }
+        }
+
+        /* Responsif HP */
+        @media (max-width: 640px) {
+            .top-navbar { padding: 6px 8px; }
+            .nav-btn { padding: 5px 7px; font-size: 0.74rem; }
+            .btn-kid { padding: 12px 18px; font-size: 1rem; }
+            .dpad-grid { grid-template-columns: repeat(3, 52px); grid-template-rows: repeat(2, 48px); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Latar Belakang Dekoratif Kartun -->
+    <div class="bg-decorations" aria-hidden="true">
+        <svg class="floating-shape" style="top:8%; left:5%; width:90px;" viewBox="0 0 100 60">
+            <path d="M25,50 Q10,50 10,35 Q10,20 25,20 Q30,5 50,5 Q70,5 75,20 Q90,20 90,35 Q90,50 75,50 Z" fill="#FFFFFF"/>
+        </svg>
+        <svg class="floating-shape" style="top:18%; right:8%; width:110px; animation-delay:2s;" viewBox="0 0 100 60">
+            <path d="M25,50 Q10,50 10,35 Q10,20 25,20 Q30,5 50,5 Q70,5 75,20 Q90,20 90,35 Q90,50 75,50 Z" fill="#FFFFFF"/>
+        </svg>
+        <svg class="floating-shape" style="bottom:12%; left:10%; width:60px; animation-delay:4s;" viewBox="0 0 50 50">
+            <polygon points="25,2 31,18 48,18 34,28 39,45 25,35 11,45 16,28 2,18 19,18" fill="#FFD54F"/>
+        </svg>
+        <svg class="floating-shape" style="bottom:20%; right:6%; width:55px; animation-delay:1s;" viewBox="0 0 50 50">
+            <circle cx="25" cy="25" r="20" fill="#FF80AB"/>
+        </svg>
+    </div>
+
+    <!-- Layer Efek Visual Konfeti & Bintang -->
+    <div id="fxLayer" class="fx-layer"></div>
+
+    <!-- Navigasi Atas Konsisten -->
+    <header class="top-navbar">
+        <div class="brand-mini" onclick="navigateTo('home')">
+            <span>🔍</span>
+            <span>DUNIA FONOLOGI</span>
+        </div>
+
+        <nav class="nav-links" aria-label="Menu Navigasi">
+            <button class="nav-btn active" data-nav="home" onclick="navigateTo('home')">🏠 Beranda</button>
+            <button class="nav-btn" data-nav="materi" onclick="navigateTo('materi')">📚 Materi</button>
+            <button class="nav-btn" data-nav="detective" onclick="navigateTo('detective')">🕵️ Misi Detektif</button>
+            <button class="nav-btn" data-nav="mall" onclick="navigateTo('mall')">🏬 Phonology Mall</button>
+            <button class="nav-btn" data-nav="puzzle" onclick="navigateTo('puzzle')">🧩 Puzzle Kata</button>
+            <button class="nav-btn" data-nav="result" onclick="navigateTo('result')">🏆 Hasil</button>
+            <button class="nav-btn" onclick="openModal('audioModal')">🔊 Suara</button>
+        </nav>
+
+        <div class="hud-stats">
+            <div class="stat-pill" title="Total Bintang">⭐ <span id="hudStars">0</span></div>
+            <div class="stat-pill coin" title="Total Koin Mall">🪙 <span id="hudCoins">0</span></div>
+        </div>
+    </header>
+
+    <!-- Kontainer Utama Aplikasi -->
+    <main class="app-container">
+
+        <!-- ======================================================================
+             HALAMAN 1: HALAMAN PEMBUKA (BERANDA)
+             ====================================================================== -->
+        <section id="screen-home" class="screen active">
+            <div class="hero-box">
+                <h1 class="game-title">PETUALANGAN DUNIA FONOLOGI</h1>
+                <div class="game-tagline">✨ Jelajahi Bunyi, Pecahkan Misteri, dan Taklukkan Tantangan Kata! ✨</div>
+
+                <!-- Ilustrasi SVG Karakter Anak SD Detektif Cilik -->
+                <div class="detective-mascot-wrap">
+                    <svg class="mascot-bounce" width="170" height="170" viewBox="0 0 200 200" aria-label="Ilustrasi Detektif Cilik">
+                        <!-- Topi Detektif -->
+                        <ellipse cx="100" cy="58" rx="62" ry="14" fill="#8D6E63"/>
+                        <path d="M52,58 Q55,22 100,22 Q145,22 148,58 Z" fill="#A1887F"/>
+                        <rect x="54" y="48" width="92" height="10" rx="4" fill="#FFD54F"/>
+                        <!-- Kepala & Wajah Ceria -->
+                        <circle cx="100" cy="95" r="42" fill="#FFCCBC"/>
+                        <!-- Rambut -->
+                        <path d="M58,88 Q60,55 100,55 Q140,55 142,88 Q130,68 100,68 Q70,68 58,88 Z" fill="#3E2723"/>
+                        <!-- Mata Berbinar -->
+                        <circle cx="85" cy="92" r="6" fill="#212121"/>
+                        <circle cx="87" cy="90" r="2" fill="#FFFFFF"/>
+                        <circle cx="115" cy="92" r="6" fill="#212121"/>
+                        <circle cx="117" cy="90" r="2" fill="#FFFFFF"/>
+                        <!-- Pipi Merona -->
+                        <ellipse cx="74" cy="103" rx="7" ry="4" fill="#FF8A80" opacity="0.7"/>
+                        <ellipse cx="126" cy="103" rx="7" ry="4" fill="#FF8A80" opacity="0.7"/>
+                        <!-- Senyum Lebar -->
+                        <path d="M86,108 Q100,124 114,108" stroke="#D84315" stroke-width="4" fill="none" stroke-linecap="round"/>
+                        <!-- Seragam SD Merah Putih + Rompi Detektif -->
+                        <path d="M62,140 Q100,132 138,140 L146,185 L54,185 Z" fill="#FFFFFF"/>
+                        <path d="M62,140 L85,140 L90,185 L54,185 Z" fill="#FF7043"/>
+                        <path d="M138,140 L115,140 L110,185 L146,185 Z" fill="#FF7043"/>
+                        <polygon points="100,140 93,165 100,175 107,165" fill="#E53935"/>
+                        <!-- Kaca Pembesar -->
+                        <line x1="142" y1="138" x2="165" y2="162" stroke="#5D4037" stroke-width="8" stroke-linecap="round"/>
+                        <circle cx="132" cy="126" r="22" fill="#E1F5FE" stroke="#0288D1" stroke-width="6"/>
+                        <path d="M122,118 Q128,112 136,116" stroke="#FFFFFF" stroke-width="3" fill="none" stroke-linecap="round"/>
+                    </svg>
+
+                    <div class="speech-bubble">
+                        "Halo, detektif cilik! Siap menjelajahi dunia bunyi dan memecahkan misteri fonologi?"
+                    </div>
+                </div>
+
+                <div class="hero-actions">
+                    <button class="btn-kid btn-pink btn-start-huge" onclick="startAdventure()">
+                        🚀 MULAI PETUALANGAN
+                    </button>
+                </div>
+
+                <div class="hero-actions" style="margin-top: 14px;">
+                    <button class="btn-kid btn-blue" onclick="openModal('guideModal')">
+                        📖 PETUNJUK PERMAINAN
+                    </button>
+                    <button class="btn-kid btn-purple" onclick="openModal('profileModal')">
+                        🧑‍🎓 PROFIL DETEKTIF
+                    </button>
+                    <button class="btn-kid btn-yellow" onclick="openModal('audioModal')">
+                        🎵 PENGATURAN SUARA
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======================================================================
+             HALAMAN 2: MENU UTAMA (3 KARTU PERMAINAN)
+             ====================================================================== -->
+        <section id="screen-menu" class="screen">
+            <div class="menu-header">
+                <h2>🗺️ PILIH PETUALANGANMU, DETEKTIF!</h2>
+                <p style="font-weight:700; color:#455A64;">Selesaikan ketiga dunia permainan untuk meraih gelar <strong>Detektif Fonologi Hebat!</strong></p>
+            </div>
+
+            <div class="games-grid">
+                <!-- KARTU GAME 1 -->
+                <div class="game-card">
+                    <div>
+                        <span class="game-card-badge" style="background: var(--pastel-pink-dark);">GAME 1 • 5 LEVEL</span>
+                        <div style="margin: 8px 0;">
+                            <svg width="96" height="96" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="45" fill="#FCE4EC"/>
+                                <circle cx="44" cy="44" r="22" fill="#E1F5FE" stroke="#F50057" stroke-width="6"/>
+                                <line x1="60" y1="60" x2="80" y2="80" stroke="#8D6E63" stroke-width="8" stroke-linecap="round"/>
+                                <text x="44" y="50" text-anchor="middle" font-size="18" font-weight="900" fill="#F50057">/p/</text>
+                            </svg>
+                        </div>
+                        <h3>MISI DETEKTIF FONOLOGI</h3>
+                        <p>Jadilah detektif cilik dan pecahkan berbagai teka-teki tentang bunyi bahasa.</p>
+                    </div>
+                    <div>
+                        <div class="card-progress-pill" id="menuProgDetective">Progres: 0 / 15 Soal</div>
+                        <button class="btn-kid btn-pink" style="width:100%;" onclick="navigateTo('detective')">
+                            ▶️ MAINKAN
+                        </button>
+                    </div>
+                </div>
+
+                <!-- KARTU GAME 2 -->
+                <div class="game-card card-mall">
+                    <div>
+                        <span class="game-card-badge" style="background: var(--pastel-blue-dark);">GAME 2 • SIMULASI 2D</span>
+                        <div style="margin: 8px 0;">
+                            <svg width="96" height="96" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="45" fill="#E1F5FE"/>
+                                <rect x="20" y="34" width="60" height="44" rx="6" fill="#FFD54F" stroke="#0288D1" stroke-width="4"/>
+                                <path d="M16,36 L25,20 L75,20 L84,36 Z" fill="#FF80AB" stroke="#0288D1" stroke-width="3"/>
+                                <rect x="42" y="54" width="16" height="24" fill="#FFFFFF"/>
+                            </svg>
+                        </div>
+                        <h3>HAPPY PHONOLOGY MALL</h3>
+                        <p>Jelajahi pusat perbelanjaan, kunjungi toko-toko, dan selesaikan tantangan fonologi.</p>
+                    </div>
+                    <div>
+                        <div class="card-progress-pill" id="menuProgMall">Toko Selesai: 0 / 6 Toko</div>
+                        <button class="btn-kid btn-blue" style="width:100%;" onclick="navigateTo('mall')">
+                            ▶️ MAINKAN
+                        </button>
+                    </div>
+                </div>
+
+                <!-- KARTU GAME 3 -->
+                <div class="game-card card-puzzle">
+                    <div>
+                        <span class="game-card-badge" style="background: var(--pastel-green-dark);">GAME 3 • 10 KATA</span>
+                        <div style="margin: 8px 0;">
+                            <svg width="96" height="96" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="45" fill="#E8F5E9"/>
+                                <rect x="22" y="22" width="26" height="26" rx="5" fill="#81C784" stroke="#2E7D32" stroke-width="3"/>
+                                <rect x="52" y="22" width="26" height="26" rx="5" fill="#FFD54F" stroke="#F57F17" stroke-width="3"/>
+                                <rect x="22" y="52" width="26" height="26" rx="5" fill="#4FC3F7" stroke="#0277BD" stroke-width="3"/>
+                                <rect x="52" y="52" width="26" height="26" rx="5" fill="#FF80AB" stroke="#C2185B" stroke-width="3"/>
+                            </svg>
+                        </div>
+                        <h3>PUZZLE DUNIA KATA</h3>
+                        <p>Susun potongan gambar menjadi bentuk utuh dan pecahkan tantangan kata.</p>
+                    </div>
+                    <div>
+                        <div class="card-progress-pill" id="menuProgPuzzle">Puzzle Selesai: 0 / 10 Kata</div>
+                        <button class="btn-kid btn-green" style="width:100%;" onclick="navigateTo('puzzle')">
+                            ▶️ MAINKAN
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align:center; margin-top:20px; display:flex; justify-content:center; gap:12px; flex-wrap:wrap;">
+                <button class="btn-kid btn-yellow" onclick="navigateTo('materi')">📚 BACA MATERI FONOLOGI DULU</button>
+                <button class="btn-kid btn-orange" onclick="navigateTo('home')">⬅️ KEMBALI KE BERANDA</button>
+            </div>
+        </section>
+
+        <!-- ======================================================================
+             HALAMAN 3: GAME 1 - MISI DETEKTIF FONOLOGI (15 SOAL / 5 LEVEL)
+             ====================================================================== -->
+        <section id="screen-detective" class="screen">
+            <div class="detective-header">
+                <div>
+                    <h2 style="color:var(--pastel-pink-dark); font-size:1.35rem;">🕵️ MISI DETEKTIF FONOLOGI</h2>
+                    <span id="detectiveQuestionCounter" style="font-weight:800; color:#546E7A;">Soal 1 dari 15</span>
+                </div>
+                <div class="level-pills" id="detectiveLevelPills">
+                    <span class="lvl-badge current">Lv 1: Detektif Bunyi</span>
+                    <span class="lvl-badge">Lv 2: Misteri Fonem</span>
+                    <span class="lvl-badge">Lv 3: Pasangan Minimal</span>
+                    <span class="lvl-badge">Lv 4: Vokal & Konsonan</span>
+                    <span class="lvl-badge">Lv 5: Susun Kata</span>
+                </div>
+                <div style="display:flex; gap:8px;">
+                    <button class="btn-kid btn-yellow" style="padding:8px 14px; font-size:0.9rem;" onclick="toggleDetectiveHint()">💡 Petunjuk</button>
+                    <button class="btn-kid btn-blue" style="padding:8px 14px; font-size:0.9rem;" onclick="navigateTo('menu')">🗺️ Menu</button>
+                </div>
+                <div class="progress-bar-outer">
+                    <div class="progress-bar-inner" id="detectiveProgressBar"></div>
+                </div>
+            </div>
+
+            <div class="detective-stage">
+                <div style="text-align:center;">
+                    <span id="detectiveLevelTitle" style="background:#F3E5F5; color:#6A1B9A; padding:6px 16px; border-radius:16px; font-weight:900; font-size:0.95rem;">
+                        LEVEL 1: DETEKTIF BUNYI
+                    </span>
+                </div>
+
+                <!-- Area Tampilan Kata -->
+                <div class="word-showcase" id="detectiveWordShowcase"></div>
+
+                <!-- Pertanyaan -->
+                <div class="question-text" id="detectiveQuestionText"></div>
+
+                <!-- Area Pilihan Ganda (Level 1 - 4) -->
+                <div class="options-grid" id="detectiveOptionsGrid"></div>
+
+                <!-- Area Susun Kata (Level 5) -->
+                <div class="scramble-area" id="detectiveScrambleArea" style="display:none;">
+                    <div style="font-weight:800; color:#0277BD;">Klik huruf di bawah untuk menyusun kata yang benar:</div>
+                    <div class="answer-slots" id="scrambleSlots"></div>
+                    <div class="letter-pool" id="scramblePool"></div>
+                    <div style="display:flex; gap:10px;">
+                        <button class="btn-kid btn-orange" style="padding:10px 18px; font-size:0.95rem;" onclick="resetScrambleInput()">🔄 Ulangi Huruf</button>
+                        <button class="btn-kid btn-green" style="padding:10px 22px; font-size:0.95rem;" onclick="checkScrambleAnswer()">✅ Periksa Kata</button>
+                    </div>
+                </div>
+
+                <!-- Kotak Petunjuk -->
+                <div class="hint-box" id="detectiveHintBox"></div>
+
+                <!-- Umpan Balik & Pembahasan -->
+                <div class="feedback-banner" id="detectiveFeedback"></div>
+
+                <!-- Tombol Lanjut -->
+                <div style="text-align:center; margin-top:16px;">
+                    <button class="btn-kid btn-green" id="detectiveNextBtn" style="display:none;" onclick="nextDetectiveQuestion()">
+                        ➡️ SOAL BERIKUTNYA
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======================================================================
+             HALAMAN 4: GAME 2 - HAPPY PHONOLOGY MALL (SIMULASI TOP-DOWN 2D)
+             ====================================================================== -->
+        <section id="screen-mall" class="screen">
+            <div class="mall-wrapper">
+                <div class="mall-topbar">
+                    <div>
+                        <h2 style="color:var(--pastel-blue-dark); font-size:1.35rem;">🏬 HAPPY PHONOLOGY MALL</h2>
+                        <span style="font-size:0.9rem; font-weight:700; color:#455A64;">Gerakkan detektif cilik ke pintu toko untuk menyelesaikan tantangan bunyi!</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span class="stat-pill" id="mallShopCounter">🏪 Toko: 0/6</span>
+                        <button class="btn-kid btn-pink" style="padding:8px 14px; font-size:0.9rem;" onclick="navigateTo('menu')">🗺️ Menu</button>
+                    </div>
+                </div>
+
+                <!-- Canvas Dunia Mall 2D -->
+                <div class="mall-canvas-container">
+                    <canvas id="mallCanvas" width="860" height="540"></canvas>
+                    <!-- Tombol Interaksi Muncul Saat Dekat Toko -->
+                    <div class="mall-interact-overlay" id="mallInteractOverlay">
+                        <button class="btn-kid btn-pink" id="mallInteractBtn" onclick="openCurrentShopChallenge()">
+                            🏪 KUNJUNGI TOKO
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Kontrol Sentuh D-Pad & Status Toko -->
+                <div class="mall-controls-area">
+                    <div class="dpad-grid" aria-label="Kontrol Arah Karakter">
+                        <div></div>
+                        <button class="dpad-btn" id="btnUp" aria-label="Atas">⬆️</button>
+                        <div></div>
+                        <button class="dpad-btn" id="btnLeft" aria-label="Kiri">⬅️</button>
+                        <button class="dpad-btn" id="btnDown" aria-label="Bawah">⬇️</button>
+                        <button class="dpad-btn" id="btnRight" aria-label="Kanan">➡️</button>
+                    </div>
+
+                    <div style="flex:1; min-width:240px;">
+                        <div style="font-weight:900; font-size:0.92rem; margin-bottom:6px; text-align:center; color:#37474F;">
+                            Daftar Toko di Happy Phonology Mall (Gunakan Panah Keyboard / Tombol Biru):
+                        </div>
+                        <div class="shop-status-list" id="mallShopStatusList"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======================================================================
+             HALAMAN 5: GAME 3 - PUZZLE DUNIA KATA
+             ====================================================================== -->
+        <section id="screen-puzzle" class="screen">
+            <div class="puzzle-wrapper">
+                <div class="puzzle-controls-bar">
+                    <div>
+                        <h2 style="color:var(--pastel-green-dark); font-size:1.35rem;">🧩 PUZZLE DUNIA KATA</h2>
+                        <span style="font-size:0.88rem; font-weight:700; color:#37474F;">Klik dua potongan gambar untuk menukar posisinya hingga utuh!</span>
+                    </div>
+
+                    <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
+                        <select id="puzzleWordSelect" class="puzzle-select" onchange="initPuzzleGame()"></select>
+                        <select id="puzzleDifficultySelect" class="puzzle-select" onchange="initPuzzleGame()">
+                            <option value="2">Mudah (4 Potong)</option>
+                            <option value="3-2">Sedang (6 Potong)</option>
+                            <option value="3">Sulit (9 Potong)</option>
+                        </select>
+                        <button class="btn-kid btn-orange" style="padding:8px 14px; font-size:0.9rem;" onclick="initPuzzleGame()">🔀 Acak</button>
+                        <button class="btn-kid btn-blue" style="padding:8px 14px; font-size:0.9rem;" onclick="navigateTo('menu')">🗺️ Menu</button>
+                    </div>
+                </div>
+
+                <div class="puzzle-play-area">
+                    <div class="puzzle-target-banner">
+                        Susun Gambar Kata: <span id="puzzleCurrentWordLabel" style="font-size:1.6rem; letter-spacing:3px; color:#D84315;">PAKU</span>
+                    </div>
+
+                    <!-- Papan Puzzle -->
+                    <div class="puzzle-board" id="puzzleBoard"></div>
+
+                    <!-- Area Tantangan Fonologi Setelah Puzzle Selesai -->
+                    <div id="puzzleChallengeBox" class="card-box" style="display:none; width:100%; max-width:650px; border-color:var(--pastel-pink);">
+                        <h3 style="color:var(--pastel-pink-dark); text-align:center; margin-bottom:8px;">
+                            🎉 Gambar Berhasil Disusun! Sekarang Pecahkan Tantangan Fonologinya!
+                        </h3>
+                        <p id="puzzleChallengeProgress" style="text-align:center; font-weight:800; color:#546E7A; margin-bottom:10px;"></p>
+                        <div class="question-text" id="puzzleQuestionText"></div>
+                        <div class="options-grid" id="puzzleOptionsGrid"></div>
+                        <div class="feedback-banner" id="puzzleFeedback"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======================================================================
+             HALAMAN 6: MATERI PEMBELAJARAN FONOLOGI SD
+             ====================================================================== -->
+        <section id="screen-materi" class="screen">
+            <div class="card-box" style="border-color: var(--pastel-yellow-dark);">
+                <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:10px; margin-bottom:12px;">
+                    <div>
+                        <h2 style="color:var(--pastel-purple-dark); font-size:1.7rem;">📚 ENSIKLOPEDIA DETEKTIF FONOLOGI</h2>
+                        <p style="font-weight:700; color:#546E7A;">Pelajari rahasia bunyi bahasa Indonesia sebelum berpetualang!</p>
+                    </div>
+                    <button class="btn-kid btn-pink" onclick="navigateTo('menu')">🎮 LANJUT MAIN GAME</button>
+                </div>
+
+                <div class="materi-grid">
+                    <div class="materi-card">
+                        <h4>1️⃣ Pengertian Fonologi</h4>
+                        <p><strong>Fonologi</strong> adalah cabang ilmu bahasa yang mempelajari tentang bunyi-bunyi bahasa yang diucapkan oleh manusia serta fungsinya dalam membedakan makna kata.</p>
+                        <div class="materi-example">💡 Contoh: Bunyi /p/ pada "PAKU" berbeda makna dengan bunyi /b/ pada "BAKU".</div>
+                    </div>
+
+                    <div class="materi-card">
+                        <h4>2️⃣ Pengertian Fonem</h4>
+                        <p><strong>Fonem</strong> adalah satuan bunyi terkecil dalam bahasa yang mampu membedakan arti kata. Penulisan fonem diapit oleh dua garis miring, misalnya <strong>/a/</strong>, <strong>/b/</strong>, <strong>/k/</strong>.</p>
+                        <div class="materi-example">💡 Contoh: Kata BOLA terdiri dari 4 fonem yaitu /b/ - /o/ - /l/ - /a/.</div>
+                    </div>
+
+                    <div class="materi-card">
+                        <h4>3️⃣ Bunyi Bahasa vs Huruf</h4>
+                        <p><strong>Huruf</strong> adalah lambang tulisan (abjad A-Z), sedangkan <strong>bunyi bahasa (fonem)</strong> adalah suara yang terdengar saat kata diucapkan. Kadang 2 huruf mewakili 1 bunyi!</p>
+                        <div class="materi-example">💡 Contoh: Pada kata "KUCING", huruf "ng" melambangkan 1 bunyi fonem /ŋ/.</div>
+                    </div>
+
+                    <div class="materi-card">
+                        <h4>4️⃣ Fonem Vokal</h4>
+                        <p><strong>Fonem vokal</strong> adalah bunyi bahasa yang keluar dari paru-paru tanpa hambatan pada alat ucap. Dalam bahasa Indonesia terdapat vokal <strong>/a/, /i/, /u/, /e/, /o/</strong>.</p>
+                        <div class="materi-example">💡 Contoh: Pada kata "BUKU", fonem vokalnya adalah /u/.</div>
+                    </div>
+
+                    <div class="materi-card">
+                        <h4>5️⃣ Fonem Konsonan</h4>
+                        <p><strong>Fonem konsonan</strong> adalah bunyi bahasa yang mengalami hambatan oleh bibir, lidah, atau gigi saat diucapkan, seperti <strong>/b/, /p/, /k/, /m/, /s/, /t/</strong>.</p>
+                        <div class="materi-example">💡 Contoh: Pada kata "BOLA", fonem konsonannya adalah /b/ dan /l/.</div>
+                    </div>
+
+                    <div class="materi-card">
+                        <h4>6️⃣ Fonem Awal, Tengah, dan Akhir</h4>
+                        <p>Letak bunyi dalam kata dibagi menjadi tiga: <strong>fonem awal</strong> (di depan), <strong>fonem tengah</strong> (di bagian dalam), dan <strong>fonem akhir</strong> (di paling belakang).</p>
+                        <div class="materi-example">💡 Contoh Kata ROTI: Awal = /r/, Tengah = /o/ & /t/, Akhir = /i/.</div>
+                    </div>
+
+                    <div class="materi-card">
+                        <h4>7️⃣ Pasangan Minimal</h4>
+                        <p><strong>Pasangan minimal</strong> adalah dua kata yang memiliki bentuk dan bunyi hampir sama, tetapi berbeda tepat <strong>satu fonem saja</strong> sehingga maknanya berbeda.</p>
+                        <div class="materi-example">💡 Contoh: PAKU – BAKU, PITA – KITA, TOPI – KOPI, KALI – GALI.</div>
+                    </div>
+
+                    <div class="materi-card">
+                        <h4>8️⃣ Jumlah Fonem dalam Kata</h4>
+                        <p>Menghitung jumlah fonem berarti menghitung berapa banyak bunyi yang menyusun kata tersebut, termasuk gabungan huruf seperti <strong>ng, ny, sy, kh</strong> sebagai satu bunyi.</p>
+                        <div class="materi-example">💡 Contoh: MANGGA → /m/-/a/-/ŋ/-/g/-/a/ = 5 fonem (bukan 6!).</div>
+                    </div>
+
+                    <div class="materi-card">
+                        <h4>9️⃣ Suku Kata</h4>
+                        <p><strong>Suku kata</strong> adalah bagian kata yang diucapkan dalam satu hembusan napas atau satu ketukan suara.</p>
+                        <div class="materi-example">💡 Contoh: PI - SANG (2 suku kata), SE - PA - TU (3 suku kata).</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======================================================================
+             HALAMAN 7: HALAMAN HASIL PERMAINAN & PENGHARGAAN
+             ====================================================================== -->
+        <section id="screen-result" class="screen">
+            <div class="card-box" style="text-align:center; border-color:var(--pastel-yellow-dark); background: linear-gradient(180deg, #FFFFFF, #FFFDE7);">
+                <div style="font-size:3.5rem; margin-bottom:6px;">🏆🎖️🌟</div>
+                <h2 id="resultHeadline" style="font-size:2rem; color:var(--pastel-pink-dark); margin-bottom:8px;">
+                    RAPOR PETUALANGAN DETEKTIF CILIK
+                </h2>
+                <p id="resultSubtitle" style="font-size:1.1rem; font-weight:700; color:#455A64; max-width:680px; margin:0 auto 18px;">
+                    Terus selesaikan semua misi di ketiga permainan untuk meraih gelar tertinggi!
+                </p>
+
+                <!-- Lencana Gelar -->
+                <div id="titleBadgeBox" style="display:inline-block; background:linear-gradient(90deg, #FFD54F, #FFB300); border:4px solid #E65100; border-radius:26px; padding:14px 28px; margin-bottom:20px; box-shadow:0 6px 0 #E65100;">
+                    <div style="font-size:0.85rem; font-weight:900; color:#5D4037;">GELAR SAAT INI:</div>
+                    <div id="detectiveRankTitle" style="font-size:1.55rem; font-weight:900; color:#3E2723;">DETEKTIF FONOLOGI PEMULA</div>
+                </div>
+
+                <!-- Rincian Skor 3 Game -->
+                <div class="games-grid" style="margin-bottom:22px;">
+                    <div class="materi-card" style="border-color:var(--pastel-pink);">
+                        <h4>🕵️ Misi Detektif</h4>
+                        <p id="resDetectiveDetail" style="font-size:1.1rem; font-weight:900;">0 / 15 Soal Selesai</p>
+                    </div>
+                    <div class="materi-card" style="border-color:var(--pastel-blue);">
+                        <h4>🏬 Happy Phonology Mall</h4>
+                        <p id="resMallDetail" style="font-size:1.1rem; font-weight:900;">0 / 6 Toko Dikunjungi</p>
+                    </div>
+                    <div class="materi-card" style="border-color:var(--pastel-green);">
+                        <h4>🧩 Puzzle Dunia Kata</h4>
+                        <p id="resPuzzleDetail" style="font-size:1.1rem; font-weight:900;">0 / 10 Puzzle Selesai</p>
+                    </div>
+                </div>
+
+                <div style="background:#E1F5FE; border:3px solid #0288D1; border-radius:20px; padding:16px; max-width:540px; margin:0 auto 20px;">
+                    <div style="font-size:1.25rem; font-weight:900; color:#01579B;">
+                        ⭐ Total Bintang: <span id="resTotalStars">0</span> &nbsp;|&nbsp; 🪙 Total Koin: <span id="resTotalCoins">0</span>
+                    </div>
+                </div>
+
+                <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:12px;">
+                    <button class="btn-kid btn-pink" onclick="navigateTo('menu')">🎮 KEMBALI KE MENU GAME</button>
+                    <button class="btn-kid btn-orange" onclick="resetAllProgress()">🔄 ULANGI PETUALANGAN DARI AWAL</button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ==========================================================================
+         MODAL-MODAL INTERAKTIF (TOKO MALL, PETUNJUK, PROFIL, AUDIO)
+         ========================================================================== -->
+
+    <!-- 1. Modal Tantangan Toko Mall -->
+    <div class="modal-backdrop" id="shopModal">
+        <div class="modal-card" style="border-color: var(--pastel-blue);">
+            <button class="modal-close" onclick="closeModal('shopModal')">✕</button>
+            <div style="text-align:center; margin-bottom:12px;">
+                <span id="shopModalBadge" style="background:var(--pastel-blue-dark); color:white; padding:5px 14px; border-radius:14px; font-weight:900; font-size:0.85rem;">TOKO MALL</span>
+                <h3 id="shopModalTitle" style="font-size:1.5rem; color:#01579B; margin-top:8px;">Tantangan Toko</h3>
+                <p id="shopModalStep" style="font-weight:800; color:#546E7A;">Pertanyaan 1 dari 3</p>
+            </div>
+            <div class="question-text" id="shopQuestionText"></div>
+            <div class="options-grid" id="shopOptionsGrid"></div>
+            <div class="feedback-banner" id="shopFeedback"></div>
+            <div style="text-align:center; margin-top:14px;">
+                <button class="btn-kid btn-green" id="shopNextBtn" style="display:none;" onclick="nextShopQuestion()">➡️ LANJUT</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Modal Petunjuk Permainan -->
+    <div class="modal-backdrop" id="guideModal">
+        <div class="modal-card" style="border-color: var(--pastel-blue);">
+            <button class="modal-close" onclick="closeModal('guideModal')">✕</button>
+            <h3 style="color:var(--pastel-blue-dark); font-size:1.5rem; margin-bottom:12px;">📖 PETUNJUK BERMAIN</h3>
+            <ul style="padding-left:20px; line-height:1.65; font-weight:700; color:var(--text-dark);">
+                <li><strong>1. Misi Detektif Fonologi:</strong> Jawab 15 teka-teki bunyi dari Level 1 hingga Level 5. Klik <em>Petunjuk</em> jika butuh bantuan!</li>
+                <li><strong>2. Happy Phonology Mall:</strong> Gunakan tombol panah di keyboard atau tombol panah biru di layar untuk berjalan masuk ke 6 toko berbeda.</li>
+                <li><strong>3. Puzzle Dunia Kata:</strong> Klik 2 potongan gambar untuk menukarnya hingga membentuk gambar utuh, lalu jawab kuis fonologinya!</li>
+                <li><strong>4. Kumpulkan Bintang & Koin:</strong> Selesaikan semua misi untuk meraih gelar <em>Detektif Fonologi Hebat!</em></li>
+            </ul>
+            <div style="text-align:center; margin-top:18px;">
+                <button class="btn-kid btn-blue" onclick="closeModal('guideModal')">👍 SIAP MENGERTI!</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Modal Profil Detektif -->
+    <div class="modal-backdrop" id="profileModal">
+        <div class="modal-card" style="border-color: var(--pastel-purple);">
+            <button class="modal-close" onclick="closeModal('profileModal')">✕</button>
+            <h3 style="color:var(--pastel-purple-dark); font-size:1.5rem; margin-bottom:12px;">🧑‍🎓 KARTU IDENTITAS DETEKTIF</h3>
+            <div style="margin-bottom:14px;">
+                <label style="display:block; font-weight:800; margin-bottom:6px;">Nama Detektif Cilik:</label>
+                <input type="text" id="playerNameInput" value="Detektif Cilik" maxlength="24"
+                    style="width:100%; padding:10px 14px; border-radius:14px; border:3px solid #BA68C8; font-family:inherit; font-size:1.05rem; font-weight:800;">
+            </div>
+            <div style="background:#F3E5F5; padding:12px; border-radius:16px; font-weight:800; color:#4A148C; margin-bottom:16px;">
+                <div>⭐ Bintang Terkumpul: <span id="profStars">0</span></div>
+                <div>🪙 Koin Mall: <span id="profCoins">0</span></div>
+                <div>🎖️ Gelar: <span id="profRank">Detektif Fonologi Pemula</span></div>
+            </div>
+            <div style="text-align:center;">
+                <button class="btn-kid btn-purple" onclick="saveProfileName()">💾 SIMPAN PROFIL</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Modal Pengaturan Musik & Suara -->
+    <div class="modal-backdrop" id="audioModal">
+        <div class="modal-card" style="border-color: var(--pastel-yellow-dark);">
+            <button class="modal-close" onclick="closeModal('audioModal')">✕</button>
+            <h3 style="color:#E65100; font-size:1.5rem; margin-bottom:14px;">🎵 PENGATURAN MUSIK & SUARA</h3>
+            <div style="display:flex; flex-direction:column; gap:14px; font-weight:800;">
+                <div style="display:flex; justify-content:space-between; align-items:center; background:#FFF8E1; padding:12px; border-radius:16px;">
+                    <span>🎶 Musik Latar Ceria</span>
+                    <button class="btn-kid btn-green" id="toggleMusicBtn" style="padding:8px 16px; font-size:0.95rem;" onclick="toggleMusicSetting()">ON</button>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; background:#E1F5FE; padding:12px; border-radius:16px;">
+                    <span>🔊 Efek Suara & Ucapan</span>
+                    <button class="btn-kid btn-blue" id="toggleSfxBtn" style="padding:8px 16px; font-size:0.95rem;" onclick="toggleSfxSetting()">ON</button>
+                </div>
+                <div style="background:#F3E5F5; padding:12px; border-radius:16px;">
+                    <label for="volumeSlider" style="display:block; margin-bottom:6px;">🎚️ Tingkat Volume: <span id="volumeLabel">80%</span></label>
+                    <input type="range" id="volumeSlider" min="0" max="100" value="80" style="width:100%; accent-color:#F50057;" oninput="updateVolume(this.value)">
+                </div>
+            </div>
+            <div style="text-align:center; margin-top:16px;">
+                <button class="btn-kid btn-yellow" onclick="testCheerVoice()">🎤 Tes Suara "HOREEEEE!"</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+         JAVASCRIPT VANILLA LENGKAP (AUDIO, STATE, 3 GAME INTERAKTIF)
+         ========================================================================== -->
+    <script>
+        /* ==========================================================================
+           A. SISTEM AUDIO OFFLINE (WEB AUDIO API + SPEECH SYNTHESIS API)
+           ========================================================================== */
+        const AudioEngine = {
+            ctx: null,
+            musicEnabled: true,
+            sfxEnabled: true,
+            volume: 0.8,
+            bgmInterval: null,
+            bgmStep: 0,
+            unlocked: false,
+
+            init() {
+                if (!this.ctx) {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    if (AudioCtx) {
+                        this.ctx = new AudioCtx();
+                    }
+                }
+                if (this.ctx && this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+                if (!this.unlocked) {
+                    this.unlocked = true;
+                    if (this.musicEnabled) this.startBgm();
+                }
+            },
+
+            playTone(freq, duration, type = 'sine', volScale = 0.25, delay = 0) {
+                if (!this.sfxEnabled || !this.ctx || this.volume <= 0) return;
+                const now = this.ctx.currentTime + delay;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, now);
+                gain.gain.setValueAtTime(this.volume * volScale, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + duration);
+            },
+
+            playClick() {
+                this.init();
+                this.playTone(620, 0.08, 'triangle', 0.22);
+            },
+
+            playCoin() {
+                this.init();
+                this.playTone(987.77, 0.1, 'sine', 0.25, 0);
+                this.playTone(1318.51, 0.25, 'sine', 0.25, 0.09);
+            },
+
+            playApplauseAndWin() {
+                this.init();
+                // Melodi fanfare ceria
+                const notes = [523.25, 659.25, 783.99, 1046.50, 783.99, 1046.50];
+                const times = [0, 0.12, 0.24, 0.36, 0.52, 0.66];
+                notes.forEach((n, i) => this.playTone(n, 0.22, 'triangle', 0.3, times[i]));
+
+                // Simulasi tepuk tangan (noise burst ritmis)
+                if (this.sfxEnabled && this.ctx) {
+                    for (let c = 0; c < 6; c++) {
+                        this.playClap(0.15 + c * 0.14);
+                    }
+                }
+            },
+
+            playClap(delay) {
+                if (!this.ctx || !this.sfxEnabled) return;
+                const bufferSize = this.ctx.sampleRate * 0.08;
+                const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.3));
+                }
+                const noise = this.ctx.createBufferSource();
+                noise.buffer = buffer;
+                const filter = this.ctx.createBiquadFilter();
+                filter.type = 'bandpass';
+                filter.frequency.value = 1200;
+                const gain = this.ctx.createGain();
+                gain.gain.value = this.volume * 0.25;
+                noise.connect(filter);
+                filter.connect(gain);
+                gain.connect(this.ctx.destination);
+                noise.start(this.ctx.currentTime + delay);
+            },
+
+            speakChild(text, isHappy = true) {
+                this.init();
+                if (!this.sfxEnabled) return;
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                    const utter = new SpeechSynthesisUtterance(text);
+                    utter.lang = 'id-ID';
+                    utter.pitch = isHappy ? 1.55 : 1.35; // Nada tinggi ceria seperti anak-anak
+                    utter.rate = isHappy ? 1.05 : 0.98;
+                    utter.volume = this.volume;
+                    window.speechSynthesis.speak(utter);
+                }
+            },
+
+            playCorrectFeedback() {
+                this.init();
+                // Melodi naik ceria + ucapan anak-anak
+                this.playTone(523.25, 0.12, 'triangle', 0.28, 0);
+                this.playTone(659.25, 0.12, 'triangle', 0.28, 0.1);
+                this.playTone(783.99, 0.25, 'triangle', 0.3, 0.2);
+                this.speakChild("HOREEEEE! KAMU HEBAT!", true);
+            },
+
+            playWrongFeedback() {
+                this.init();
+                // Nada lembut penyemangat + ucapan anak-anak
+                this.playTone(392.00, 0.15, 'sine', 0.22, 0);
+                this.playTone(329.63, 0.22, 'sine', 0.22, 0.14);
+                this.speakChild("COBAAA LAGI! KAMU PASTI BISA!", false);
+            },
+
+            startBgm() {
+                if (this.bgmInterval) clearInterval(this.bgmInterval);
+                // Melodi anak-anak ceria (C Mayor Pentatonik)
+                const melody = [
+                    523.25, 659.25, 783.99, 659.25,
+                    587.33, 698.46, 880.00, 698.46,
+                    523.25, 659.25, 783.99, 1046.50,
+                    880.00, 783.99, 659.25, 587.33
+                ];
+                this.bgmInterval = setInterval(() => {
+                    if (!this.musicEnabled || !this.ctx || this.ctx.state !== 'running') return;
+                    const freq = melody[this.bgmStep % melody.length];
+                    this.playTone(freq, 0.24, 'sine', 0.06, 0);
+                    this.bgmStep++;
+                }, 420);
+            },
+
+            stopBgm() {
+                if (this.bgmInterval) {
+                    clearInterval(this.bgmInterval);
+                    this.bgmInterval = null;
+                }
+            }
+        };
+
+        /* ==========================================================================
+           B. STATE GLOBAL PERMAINAN & PROGRES
+           ========================================================================== */
+        const GameState = {
+            playerName: "Detektif Cilik",
+            stars: 0,
+            coins: 0,
+            detectiveSolved: new Set(),
+            mallCompletedShops: new Set(),
+            puzzleCompletedWords: new Set()
+        };
+
+        function addRewards(starsToAdd, coinsToAdd = 0) {
+            GameState.stars += starsToAdd;
+            GameState.coins += coinsToAdd;
+            if (coinsToAdd > 0) AudioEngine.playCoin();
+            updateAllHUD();
+        }
+
+        function updateAllHUD() {
+            document.getElementById('hudStars').textContent = GameState.stars;
+            document.getElementById('hudCoins').textContent = GameState.coins;
+            document.getElementById('menuProgDetective').textContent = `Progres: ${GameState.detectiveSolved.size} / 15 Soal`;
+            document.getElementById('menuProgMall').textContent = `Toko Selesai: ${GameState.mallCompletedShops.size} / 6 Toko`;
+            document.getElementById('menuProgPuzzle').textContent = `Puzzle Selesai: ${GameState.puzzleCompletedWords.size} / 10 Kata`;
+
+            // Update Profil & Hasil
+            document.getElementById('profStars').textContent = GameState.stars;
+            document.getElementById('profCoins').textContent = GameState.coins;
+            document.getElementById('resTotalStars').textContent = GameState.stars;
+            document.getElementById('resTotalCoins').textContent = GameState.coins;
+            document.getElementById('resDetectiveDetail').textContent = `${GameState.detectiveSolved.size} / 15 Soal Selesai`;
+            document.getElementById('resMallDetail').textContent = `${GameState.mallCompletedShops.size} / 6 Toko Dikunjungi`;
+            document.getElementById('resPuzzleDetail').textContent = `${GameState.puzzleCompletedWords.size} / 10 Puzzle Selesai`;
+
+            const isAllFinished =
+                GameState.detectiveSolved.size >= 15 &&
+                GameState.mallCompletedShops.size >= 6 &&
+                GameState.puzzleCompletedWords.size >= 10;
+
+            const rankEl = document.getElementById('detectiveRankTitle');
+            const profRankEl = document.getElementById('profRank');
+            const headlineEl = document.getElementById('resultHeadline');
+            const subEl = document.getElementById('resultSubtitle');
+
+            if (isAllFinished) {
+                rankEl.textContent = "DETEKTIF FONOLOGI HEBAT!";
+                profRankEl.textContent = "DETEKTIF FONOLOGI HEBAT!";
+                headlineEl.textContent = `SELAMAT, ${GameState.playerName.toUpperCase()}!`;
+                subEl.textContent = "Kamu telah berhasil menjelajahi dunia fonologi, memecahkan teka-teki bunyi, menjelajahi mall, dan menyelesaikan puzzle kata.";
+            } else if (GameState.stars >= 15) {
+                rankEl.textContent = "DETEKTIF BUNYI JUNIOR";
+                profRankEl.textContent = "DETEKTIF BUNYI JUNIOR";
+            } else {
+                rankEl.textContent = "DETEKTIF FONOLOGI PEMULA";
+                profRankEl.textContent = "DETEKTIF FONOLOGI PEMULA";
+            }
+        }
+
+        /* ==========================================================================
+           C. NAVIGASI HALAMAN, MODAL, DAN EFEK VISUAL
+           ========================================================================== */
+        function navigateTo(screenId) {
+            AudioEngine.playClick();
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            const target = document.getElementById(`screen-${screenId}`);
+            if (target) target.classList.add('active');
+
+            document.querySelectorAll('.nav-btn[data-nav]').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.nav === screenId);
+            });
+
+            if (screenId === 'mall') {
+                resizeMallCanvas();
+                renderMallShopChips();
+            }
+            if (screenId === 'result') {
+                updateAllHUD();
+                if (GameState.detectiveSolved.size >= 15 && GameState.mallCompletedShops.size >= 6 && GameState.puzzleCompletedWords.size >= 10) {
+                    launchConfetti(60);
+                    AudioEngine.playApplauseAndWin();
+                }
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function startAdventure() {
+            AudioEngine.init();
+            AudioEngine.playClick();
+            navigateTo('menu');
+        }
+
+        function openModal(id) {
+            AudioEngine.playClick();
+            updateAllHUD();
+            document.getElementById(id).classList.add('open');
+        }
+
+        function closeModal(id) {
+            AudioEngine.playClick();
+            document.getElementById(id).classList.remove('open');
+        }
+
+        function saveProfileName() {
+            const val = document.getElementById('playerNameInput').value.trim();
+            if (val) GameState.playerName = val;
+            updateAllHUD();
+            closeModal('profileModal');
+        }
+
+        function toggleMusicSetting() {
+            AudioEngine.init();
+            AudioEngine.musicEnabled = !AudioEngine.musicEnabled;
+            const btn = document.getElementById('toggleMusicBtn');
+            btn.textContent = AudioEngine.musicEnabled ? 'ON' : 'OFF';
+            btn.className = AudioEngine.musicEnabled ? 'btn-kid btn-green' : 'btn-kid btn-orange';
+            if (AudioEngine.musicEnabled) AudioEngine.startBgm();
+            else AudioEngine.stopBgm();
+        }
+
+        function toggleSfxSetting() {
+            AudioEngine.init();
+            AudioEngine.sfxEnabled = !AudioEngine.sfxEnabled;
+            const btn = document.getElementById('toggleSfxBtn');
+            btn.textContent = AudioEngine.sfxEnabled ? 'ON' : 'OFF';
+            btn.className = AudioEngine.sfxEnabled ? 'btn-kid btn-blue' : 'btn-kid btn-orange';
+        }
+
+        function updateVolume(val) {
+            AudioEngine.volume = val / 100;
+            document.getElementById('volumeLabel').textContent = `${val}%`;
+        }
+
+        function testCheerVoice() {
+            AudioEngine.playCorrectFeedback();
+            triggerStarBurst();
+        }
+
+        function triggerStarBurst() {
+            const el = document.createElement('div');
+            el.className = 'star-burst';
+            el.textContent = '⭐✨🌟';
+            document.getElementById('fxLayer').appendChild(el);
+            setTimeout(() => el.remove(), 950);
+        }
+
+        function launchConfetti(count = 45) {
+            const colors = ['#FF80AB', '#4FC3F7', '#FFD54F', '#81C784', '#BA68C8', '#FF7043'];
+            const container = document.getElementById('fxLayer');
+            for (let i = 0; i < count; i++) {
+                const piece = document.createElement('div');
+                piece.className = 'confetti-piece';
+                piece.style.left = `${Math.random() * 100}vw`;
+                piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                piece.style.animationDuration = `${2 + Math.random() * 2}s`;
+                piece.style.animationDelay = `${Math.random() * 0.4}s`;
+                container.appendChild(piece);
+                setTimeout(() => piece.remove(), 4500);
+            }
+        }
+
+        /* ==========================================================================
+           D. GAME 1: MISI DETEKTIF FONOLOGI (15 SOAL / 5 LEVEL)
+           ========================================================================== */
+        const detectiveQuestions = [
+            // LEVEL 1: DETEKTIF BUNYI (Soal 1 - 3)
+            {
+                id: 1, level: 1, levelName: "LEVEL 1: DETEKTIF BUNYI",
+                type: "mcq",
+                words: ["PAKU", "BAKU"],
+                question: "Apa perbedaan bunyi dari kedua kata tersebut?",
+                options: ["A. Bunyi /p/ dan /b/", "B. Bunyi /a/ dan /u/", "C. Bunyi /k/ dan /u/"],
+                answer: 0,
+                hint: "Perhatikan bunyi paling depan pada kata PAKU dan BAKU.",
+                explanation: "Tepat sekali! Kata PAKU diawali bunyi /p/, sedangkan BAKU diawali bunyi /b/. Perbedaan satu bunyi ini mengubah arti kata!"
+            },
+            {
+                id: 2, level: 1, levelName: "LEVEL 1: DETEKTIF BUNYI",
+                type: "mcq",
+                words: ["SARI", "TARI"],
+                question: "Bunyi manakah yang membedakan kata SARI dan TARI?",
+                options: ["A. Bunyi /r/ dan /i/", "B. Bunyi /s/ dan /t/", "C. Bunyi /a/ dan /i/"],
+                answer: 1,
+                hint: "Dengarkan bunyi pertama saat mengucapkan SARI dan TARI.",
+                explanation: "Hebat! SARI dimulai dengan bunyi konsonan /s/, sedangkan TARI dimulai dengan bunyi konsonan /t/."
+            },
+            {
+                id: 3, level: 1, levelName: "LEVEL 1: DETEKTIF BUNYI",
+                type: "mcq",
+                words: ["LAMA", "LIMA"],
+                question: "Apa perbedaan bunyi vokal pada kata LAMA dan LIMA?",
+                options: ["A. Bunyi /l/ dan /m/", "B. Bunyi /a/ dan /i/", "C. Bunyi /m/ dan /a/"],
+                answer: 1,
+                hint: "Bandingkan bunyi kedua setelah /l/ pada LAMA dan LIMA.",
+                explanation: "Benar! Kata LAMA memakai vokal /a/ di suku pertama, sedangkan LIMA memakai vokal /i/."
+            },
+
+            // LEVEL 2: MISTERI FONEM (Soal 4 - 6)
+            {
+                id: 4, level: 2, levelName: "LEVEL 2: MISTERI FONEM",
+                type: "mcq",
+                words: ["BOLA"],
+                question: "Apa fonem awal kata BOLA?",
+                options: ["A. Fonem /b/", "B. Fonem /o/", "C. Fonem /a/"],
+                answer: 0,
+                hint: "Fonem awal adalah bunyi pertama yang keluar dari mulutmu.",
+                explanation: "Betul! Kata BOLA tersusun atas /b/ - /o/ - /l/ - /a/, jadi fonem awalnya adalah /b/."
+            },
+            {
+                id: 5, level: 2, levelName: "LEVEL 2: MISTERI FONEM",
+                type: "mcq",
+                words: ["BOLA"],
+                question: "Berapa jumlah fonem dalam kata BOLA?",
+                options: ["A. 2 fonem", "B. 3 fonem", "C. 4 fonem"],
+                answer: 2,
+                hint: "Hitung satu per satu bunyinya: /b/ - /o/ - /l/ - /a/.",
+                explanation: "Pintar! Kata BOLA terdiri dari 4 fonem yaitu /b/, /o/, /l/, dan /a/."
+            },
+            {
+                id: 6, level: 2, levelName: "LEVEL 2: MISTERI FONEM",
+                type: "mcq",
+                words: ["BUKU"],
+                question: "Apa saja fonem yang menyusun kata BUKU?",
+                options: ["A. /b/ - /u/ - /k/ - /u/", "B. /b/ - /o/ - /k/ - /o/", "C. /p/ - /u/ - /k/ - /u/"],
+                answer: 0,
+                hint: "Ucapkan BUKU secara perlahan: BU - KU.",
+                explanation: "Sempurna! Kata BUKU disusun oleh empat fonem: /b/ - /u/ - /k/ - /u/."
+            },
+
+            // LEVEL 3: PASANGAN MINIMAL (Soal 7 - 9)
+            {
+                id: 7, level: 3, levelName: "LEVEL 3: PASANGAN MINIMAL",
+                type: "mcq",
+                words: ["PITA – KITA", "BOLA – MEJA"],
+                question: "Manakah yang merupakan pasangan minimal (berbeda tepat satu fonem)?",
+                options: ["A. PITA – KITA", "B. BOLA – MEJA", "C. BUKU – PENSIL"],
+                answer: 0,
+                hint: "Pasangan minimal bunyinya mirip sekali, hanya beda 1 bunyi saja!",
+                explanation: "Benar! PITA dan KITA hanya berbeda pada fonem awal /p/ dan /k/, sehingga disebut pasangan minimal."
+            },
+            {
+                id: 8, level: 3, levelName: "LEVEL 3: PASANGAN MINIMAL",
+                type: "mcq",
+                words: ["BATA – MATA", "KALI – GALI"],
+                question: "Pada pasangan minimal KALI – GALI, fonem apa yang berbeda?",
+                options: ["A. /a/ dan /i/", "B. /k/ dan /g/", "C. /l/ dan /i/"],
+                answer: 1,
+                hint: "Lihat bagian awal kedua kata: KALI dan GALI.",
+                explanation: "Tepat! Fonem /k/ pada KALI dan fonem /g/ pada GALI membedakan arti kedua kata tersebut."
+            },
+            {
+                id: 9, level: 3, levelName: "LEVEL 3: PASANGAN MINIMAL",
+                type: "mcq",
+                words: ["TOPI – KOPI"],
+                question: "Mengapa TOPI dan KOPI disebut pasangan minimal?",
+                options: [
+                    "A. Karena artinya sama persis",
+                    "B. Karena berbeda tepat satu fonem (/t/ dan /k/)",
+                    "C. Karena memiliki 5 suku kata"
+                ],
+                answer: 1,
+                hint: "Ingat definisi pasangan minimal di halaman Materi!",
+                explanation: "Luar biasa! TOPI dan KOPI memiliki bunyi hampir identik, hanya berbeda satu fonem (/t/ vs /k/)."
+            },
+
+            // LEVEL 4: TEKA-TEKI VOKAL DAN KONSONAN (Soal 10 - 12)
+            {
+                id: 10, level: 4, levelName: "LEVEL 4: VOKAL DAN KONSONAN",
+                type: "mcq",
+                words: ["BOLA"],
+                question: "Manakah yang merupakan fonem vokal dalam kata BOLA?",
+                options: ["A. /b/ dan /l/", "B. /o/ dan /a/", "C. /b/ dan /a/"],
+                answer: 1,
+                hint: "Ingat huruf vokal adalah a, i, u, e, o.",
+                explanation: "Hebat! Dalam kata BOLA, fonem vokalnya adalah /o/ dan /a/."
+            },
+            {
+                id: 11, level: 4, levelName: "LEVEL 4: VOKAL DAN KONSONAN",
+                type: "mcq",
+                words: ["BOLA"],
+                question: "Manakah yang merupakan fonem konsonan dalam kata BOLA?",
+                options: ["A. /b/ dan /l/", "B. /o/ dan /a/", "C. /o/ dan /l/"],
+                answer: 0,
+                hint: "Konsonan adalah bunyi selain a, i, u, e, o.",
+                explanation: "Benar! Fonem konsonan dalam kata BOLA adalah /b/ dan /l/."
+            },
+            {
+                id: 12, level: 4, levelName: "LEVEL 4: VOKAL DAN KONSONAN",
+                type: "mcq",
+                words: ["SEPATU"],
+                question: "Berapa jumlah fonem vokal dalam kata SEPATU?",
+                options: ["A. 2 fonem vokal", "B. 3 fonem vokal", "C. 4 fonem vokal"],
+                answer: 1,
+                hint: "Cari fonem /e/, /a/, dan /u/ di kata SEPATU.",
+                explanation: "Tepat! Kata SEPATU memiliki 3 fonem vokal, yaitu /e/, /a/, dan /u/."
+            },
+
+            // LEVEL 5: SUSUN KATA MISTERIUS (Soal 13 - 15)
+            {
+                id: 13, level: 5, levelName: "LEVEL 5: SUSUN KATA MISTERIUS",
+                type: "scramble",
+                scrambled: ["K", "A", "P", "U"],
+                targetWord: "PAKU",
+                question: "Susun huruf acak berikut menjadi nama alat dari besi untuk memaku kayu!",
+                hint: "Diawali fonem /p/ dan diakhiri fonem /u/ (4 fonem: /p/-/a/-/k/-/u/).",
+                explanation: "Kerja bagus, Detektif! Susunan yang benar adalah PAKU (4 fonem: /p/-/a/-/k/-/u/)."
+            },
+            {
+                id: 14, level: 5, levelName: "LEVEL 5: SUSUN KATA MISTERIUS",
+                type: "scramble",
+                scrambled: ["I", "T", "O", "P"],
+                targetWord: "TOPI",
+                question: "Susun huruf acak berikut menjadi benda yang dipakai di kepala!",
+                hint: "Diawali fonem /t/ dan diakhiri fonem /i/.",
+                explanation: "Hebat sekali! Kata misteriusnya adalah TOPI (/t/-/o/-/p/-/i/)."
+            },
+            {
+                id: 15, level: 5, levelName: "LEVEL 5: SUSUN KATA MISTERIUS",
+                type: "scramble",
+                scrambled: ["U", "B", "K", "U"],
+                targetWord: "BUKU",
+                question: "Susun huruf acak berikut menjadi benda tempat kita membaca dan menulis!",
+                hint: "Diawali fonem /b/ dan memiliki dua fonem vokal /u/.",
+                explanation: "Selamat! Kamu menaklukkan seluruh 15 soal Misi Detektif Fonologi dengan kata BUKU!"
+            }
+        ];
+
+        let currentDetIdx = 0;
+        let scrambleSelectedIndices = [];
+
+        function renderDetectiveQuestion() {
+            const q = detectiveQuestions[currentDetIdx];
+            document.getElementById('detectiveQuestionCounter').textContent = `Soal ${currentDetIdx + 1} dari ${detectiveQuestions.length}`;
+            document.getElementById('detectiveLevelTitle').textContent = q.levelName;
+            document.getElementById('detectiveQuestionText').textContent = q.question;
+
+            // Update progres bar
+            const pct = ((currentDetIdx) / detectiveQuestions.length) * 100;
+            document.getElementById('detectiveProgressBar').style.width = `${pct}%`;
+
+            // Update badge level
+            const badges = document.querySelectorAll('#detectiveLevelPills .lvl-badge');
+            badges.forEach((b, idx) => b.classList.toggle('current', idx + 1 === q.level));
+
+            // Reset kotak feedback & hint
+            const fb = document.getElementById('detectiveFeedback');
+            fb.className = 'feedback-banner';
+            fb.style.display = 'none';
+            const hintBox = document.getElementById('detectiveHintBox');
+            hintBox.style.display = 'none';
+            hintBox.textContent = `💡 Petunjuk Detektif: ${q.hint}`;
+            document.getElementById('detectiveNextBtn').style.display = 'none';
+
+            // Tampilkan kartu kata
+            const showcase = document.getElementById('detectiveWordShowcase');
+            showcase.innerHTML = '';
+
+            if (q.type === 'mcq') {
+                q.words.forEach(w => {
+                    const div = document.createElement('div');
+                    div.className = 'word-card-big';
+                    div.textContent = w;
+                    showcase.appendChild(div);
+                });
+                document.getElementById('detectiveOptionsGrid').style.display = 'grid';
+                document.getElementById('detectiveScrambleArea').style.display = 'none';
+
+                const grid = document.getElementById('detectiveOptionsGrid');
+                grid.innerHTML = '';
+                q.options.forEach((opt, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'option-btn';
+                    btn.textContent = opt;
+                    btn.onclick = () => handleDetectiveMcqAnswer(idx, btn);
+                    grid.appendChild(btn);
+                });
+            } else {
+                // Mode Susun Kata Level 5
+                q.scrambled.forEach(ch => {
+                    const div = document.createElement('div');
+                    div.className = 'word-card-big';
+                    div.style.padding = '10px 18px';
+                    div.textContent = ch;
+                    showcase.appendChild(div);
+                });
+                document.getElementById('detectiveOptionsGrid').style.display = 'none';
+                document.getElementById('detectiveScrambleArea').style.display = 'flex';
+                resetScrambleInput();
+            }
+        }
+
+        function toggleDetectiveHint() {
+            AudioEngine.playClick();
+            const hb = document.getElementById('detectiveHintBox');
+            hb.style.display = hb.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function handleDetectiveMcqAnswer(selectedIdx, btnEl) {
+            const q = detectiveQuestions[currentDetIdx];
+            const fb = document.getElementById('detectiveFeedback');
+
+            if (selectedIdx === q.answer) {
+                btnEl.classList.add('correct');
+                document.querySelectorAll('#detectiveOptionsGrid .option-btn').forEach(b => b.disabled = true);
+                fb.className = 'feedback-banner success';
+                fb.innerHTML = `🌟 <strong>HOREEEEE! KAMU HEBAT!</strong><br>${q.explanation}`;
+                fb.style.display = 'block';
+                document.getElementById('detectiveNextBtn').style.display = 'inline-flex';
+
+                AudioEngine.playCorrectFeedback();
+                triggerStarBurst();
+
+                if (!GameState.detectiveSolved.has(q.id)) {
+                    GameState.detectiveSolved.add(q.id);
+                    addRewards(2, 5);
+                }
+            } else {
+                btnEl.classList.add('wrong');
+                setTimeout(() => btnEl.classList.remove('wrong'), 450);
+                fb.className = 'feedback-banner retry';
+                fb.innerHTML = `💪 <strong>COBAAA LAGI! KAMU PASTI BISA!</strong><br>Perhatikan kembali bunyi huruf pada kata di atas ya!`;
+                fb.style.display = 'block';
+                AudioEngine.playWrongFeedback();
+            }
+        }
+
+        // Logika Level 5: Susun Kata
+        function resetScrambleInput() {
+            scrambleSelectedIndices = [];
+            renderScrambleTiles();
+        }
+
+        function renderScrambleTiles() {
+            const q = detectiveQuestions[currentDetIdx];
+            const slotsEl = document.getElementById('scrambleSlots');
+            const poolEl = document.getElementById('scramblePool');
+            slotsEl.innerHTML = '';
+            poolEl.innerHTML = '';
+
+            scrambleSelectedIndices.forEach((poolIdx, slotPos) => {
+                const tile = document.createElement('div');
+                tile.className = 'letter-tile';
+                tile.textContent = q.scrambled[poolIdx];
+                tile.title = 'Klik untuk mengembalikan huruf';
+                tile.onclick = () => {
+                    AudioEngine.playClick();
+                    scrambleSelectedIndices.splice(slotPos, 1);
+                    renderScrambleTiles();
+                };
+                slotsEl.appendChild(tile);
+            });
+
+            q.scrambled.forEach((ch, idx) => {
+                const tile = document.createElement('div');
+                tile.className = 'letter-tile' + (scrambleSelectedIndices.includes(idx) ? ' used' : '');
+                tile.textContent = ch;
+                tile.onclick = () => {
+                    AudioEngine.playClick();
+                    if (!scrambleSelectedIndices.includes(idx)) {
+                        scrambleSelectedIndices.push(idx);
+                        renderScrambleTiles();
+                    }
+                };
+                poolEl.appendChild(tile);
+            });
+        }
+
+        function checkScrambleAnswer() {
+            const q = detectiveQuestions[currentDetIdx];
+            const formed = scrambleSelectedIndices.map(i => q.scrambled[i]).join('');
+            const fb = document.getElementById('detectiveFeedback');
+
+            if (formed === q.targetWord) {
+                fb.className = 'feedback-banner success';
+                fb.innerHTML = `🌟 <strong>HOREEEEE! KAMU HEBAT!</strong><br>${q.explanation}`;
+                fb.style.display = 'block';
+                document.getElementById('detectiveNextBtn').style.display = 'inline-flex';
+                AudioEngine.playCorrectFeedback();
+                triggerStarBurst();
+
+                if (!GameState.detectiveSolved.has(q.id)) {
+                    GameState.detectiveSolved.add(q.id);
+                    addRewards(3, 10);
+                }
+            } else {
+                fb.className = 'feedback-banner retry';
+                fb.innerHTML = `💪 <strong>COBAAA LAGI! KAMU PASTI BISA!</strong><br>Susunanmu saat ini: "${formed || '(kosong)'}". Ayo susun semua huruf menjadi kata yang tepat!`;
+                fb.style.display = 'block';
+                AudioEngine.playWrongFeedback();
+            }
+        }
+
+        function nextDetectiveQuestion() {
+            AudioEngine.playClick();
+            if (currentDetIdx < detectiveQuestions.length - 1) {
+                currentDetIdx++;
+                renderDetectiveQuestion();
+            } else {
+                document.getElementById('detectiveProgressBar').style.width = '100%';
+                AudioEngine.playApplauseAndWin();
+                launchConfetti(50);
+                navigateTo('result');
+            }
+        }
+
+        /* ==========================================================================
+           E. GAME 2: HAPPY PHONOLOGY MALL (SIMULASI TOP-DOWN 2D INTERAKTIF)
+           ========================================================================== */
+        const mallShops = [
+            {
+                id: 'roti', name: 'TOKO ROTI', icon: '🥐', x: 55, y: 35, w: 210, h: 120,
+                color: '#FFCC80', roof: '#F57C00', doorX: 160, doorY: 165,
+                questions: [
+                    { q: "Identifikasi fonem awal kata ROTI!", opts: ["A. /r/", "B. /o/", "C. /i/"], ans: 0, exp: "Benar! Kata ROTI diawali oleh bunyi konsonan /r/." },
+                    { q: "Identifikasi fonem akhir kata ROTI!", opts: ["A. /t/", "B. /o/", "C. /i/"], ans: 2, exp: "Tepat! Bunyi paling akhir pada kata ROTI adalah vokal /i/." },
+                    { q: "Berapa jumlah fonem kata ROTI?", opts: ["A. 3 fonem", "B. 4 fonem", "C. 5 fonem"], ans: 1, exp: "Hebat! Kata ROTI memiliki 4 fonem: /r/ - /o/ - /t/ - /i/." }
+                ]
+            },
+            {
+                id: 'mainan', name: 'TOKO MAINAN', icon: '🧸', x: 325, y: 35, w: 210, h: 120,
+                color: '#F48FB1', roof: '#C2185B', doorX: 430, doorY: 165,
+                questions: [
+                    { q: "Bedakan bunyi pada kata PITA dan KITA!", opts: ["A. Fonem /p/ dan /k/", "B. Fonem /i/ dan /a/", "C. Fonem /t/ dan /a/"], ans: 0, exp: "Pintar! PITA diawali /p/ sedangkan KITA diawali /k/." },
+                    { q: "Apa fonem awal kata BOLA?", opts: ["A. /o/", "B. /b/", "C. /l/"], ans: 1, exp: "Benar! Fonem awal kata BOLA adalah /b/." },
+                    { q: "Tentukan kata yang memiliki bunyi awal /p/!", opts: ["A. BUKU", "B. TOPI", "C. PAKU"], ans: 2, exp: "Sempurna! Kata PAKU diawali oleh fonem /p/." }
+                ]
+            },
+            {
+                id: 'buah', name: 'TOKO BUAH', icon: '🍌', x: 595, y: 35, w: 210, h: 120,
+                color: '#A5D6A7', roof: '#388E3C', doorX: 700, doorY: 165,
+                questions: [
+                    { q: "Berapa jumlah suku kata kata PISANG?", opts: ["A. 2 suku kata (PI - SANG)", "B. 3 suku kata", "C. 4 suku kata"], ans: 0, exp: "Betul! PISANG diucapkan dalam 2 ketukan: PI - SANG." },
+                    { q: "Berapa jumlah fonem kata MANGGA?", opts: ["A. 6 fonem", "B. 5 fonem (/m/-/a/-/ŋ/-/g/-/a/)", "C. 4 fonem"], ans: 1, exp: "Luar biasa! Huruf 'ng' adalah 1 bunyi /ŋ/, jadi MANGGA punya 5 fonem!" },
+                    { q: "Tentukan fonem awal kata JERUK!", opts: ["A. /j/", "B. /e/", "C. /k/"], ans: 0, exp: "Tepat sekali! Kata JERUK diawali fonem /j/." }
+                ]
+            },
+            {
+                id: 'buku', name: 'TOKO BUKU', icon: '📚', x: 55, y: 385, w: 210, h: 120,
+                color: '#81D4FA', roof: '#0288D1', doorX: 160, doorY: 375,
+                questions: [
+                    { q: "Identifikasi fonem awal kata BUKU!", opts: ["A. /u/", "B. /b/", "C. /k/"], ans: 1, exp: "Benar! Fonem awal kata BUKU adalah /b/." },
+                    { q: "Identifikasi fonem akhir kata BUKU!", opts: ["A. /k/", "B. /b/", "C. /u/"], ans: 2, exp: "Hebat! Bunyi paling belakang pada kata BUKU adalah /u/." },
+                    { q: "Tentukan fonem vokal dalam kata BUKU!", opts: ["A. /u/", "B. /b/ dan /k/", "C. /a/ dan /i/"], ans: 0, exp: "Pintar! Satu-satunya fonem vokal yang muncul dalam BUKU adalah /u/." }
+                ]
+            },
+            {
+                id: 'pakaian', name: 'TOKO PAKAIAN', icon: '👕', x: 325, y: 385, w: 210, h: 120,
+                color: '#CE93D8', roof: '#7B1FA2', doorX: 430, doorY: 375,
+                questions: [
+                    { q: "Identifikasi fonem awal kata BAJU!", opts: ["A. /a/", "B. /b/", "C. /j/"], ans: 1, exp: "Tepat! Kata BAJU diawali oleh fonem konsonan /b/." },
+                    { q: "Identifikasi fonem akhir kata TOPI!", opts: ["A. /p/", "B. /o/", "C. /i/"], ans: 2, exp: "Benar! Kata TOPI diakhiri oleh bunyi vokal /i/." },
+                    { q: "Berapa jumlah suku kata kata SEPATU?", opts: ["A. 2 suku kata", "B. 3 suku kata (SE - PA - TU)", "C. 4 suku kata"], ans: 1, exp: "Sempurna! SE - PA - TU terdiri dari 3 suku kata." }
+                ]
+            },
+            {
+                id: 'hewan', name: 'TOKO HEWAN', icon: '🐱', x: 595, y: 385, w: 210, h: 120,
+                color: '#FFE082', roof: '#FFA000', doorX: 700, doorY: 375,
+                questions: [
+                    { q: "Identifikasi fonem awal kata KUCING!", opts: ["A. /k/", "B. /u/", "C. /ŋ/"], ans: 0, exp: "Hebat! Kata KUCING diawali fonem /k/." },
+                    { q: "Berapa jumlah suku kata kata KELINCI?", opts: ["A. 2 suku kata", "B. 3 suku kata (KE - LIN - CI)", "C. 4 suku kata"], ans: 1, exp: "Betul! KE - LIN - CI terdiri dari 3 suku kata." },
+                    { q: "Tentukan fonem akhir kata SAPI!", opts: ["A. /s/", "B. /p/", "C. /i/"], ans: 2, exp: "Luar biasa! Kata SAPI diakhiri oleh fonem vokal /i/." }
+                ]
+            }
+        ];
+
+        // Dekorasi Mall (Air mancur tengah, bangku, tanaman)
+        const mallObstacles = [
+            { x: 385, y: 242, w: 90, h: 56, type: 'fountain' },
+            { x: 210, y: 250, w: 50, h: 28, type: 'bench' },
+            { x: 600, y: 250, w: 50, h: 28, type: 'bench' }
+        ];
+
+        const playerMall = {
+            x: 430,
+            y: 315,
+            radius: 18,
+            speed: 3.4,
+            dir: 'down',
+            walkFrame: 0,
+            moving: false
+        };
+
+        const keysPressed = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false };
+        let nearbyShop = null;
+        let activeShop = null;
+        let activeShopQIdx = 0;
+
+        function setupMallControls() {
+            window.addEventListener('keydown', (e) => {
+                if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+                    if (document.getElementById('screen-mall').classList.contains('active')) {
+                        e.preventDefault();
+                        keysPressed[e.key] = true;
+                    }
+                }
+            });
+            window.addEventListener('keyup', (e) => {
+                if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+                    keysPressed[e.key] = false;
+                }
+            });
+
+            const bindDpad = (btnId, keyName) => {
+                const btn = document.getElementById(btnId);
+                const startMove = (e) => {
+                    e.preventDefault();
+                    AudioEngine.init();
+                    keysPressed[keyName] = true;
+                };
+                const stopMove = (e) => {
+                    e.preventDefault();
+                    keysPressed[keyName] = false;
+                };
+                btn.addEventListener('mousedown', startMove);
+                btn.addEventListener('mouseup', stopMove);
+                btn.addEventListener('mouseleave', stopMove);
+                btn.addEventListener('touchstart', startMove, { passive: false });
+                btn.addEventListener('touchend', stopMove, { passive: false });
+            };
+
+            bindDpad('btnUp', 'ArrowUp');
+            bindDpad('btnDown', 'ArrowDown');
+            bindDpad('btnLeft', 'ArrowLeft');
+            bindDpad('btnRight', 'ArrowRight');
+        }
+
+        function resizeMallCanvas() {
+            // Canvas internal tetap 860x540 agar koordinat tabrakan presisi di semua ukuran layar
+            renderMallShopChips();
+        }
+
+        function renderMallShopChips() {
+            const container = document.getElementById('mallShopStatusList');
+            container.innerHTML = '';
+            mallShops.forEach(s => {
+                const done = GameState.mallCompletedShops.has(s.id);
+                const chip = document.createElement('span');
+                chip.className = 'shop-chip' + (done ? ' done' : '');
+                chip.textContent = `${s.icon} ${s.name} ${done ? '✅' : ''}`;
+                container.appendChild(chip);
+            });
+            document.getElementById('mallShopCounter').textContent = `🏪 Toko: ${GameState.mallCompletedShops.size}/6`;
+        }
+
+        function checkMallCollision(nx, ny) {
+            const r = playerMall.radius;
+            // Batas dinding luar mall
+            if (nx - r < 18 || nx + r > 842 || ny - r < 18 || ny + r > 522) return true;
+
+            // Tabrakan dengan bangunan toko
+            for (const s of mallShops) {
+                if (nx + r > s.x && nx - r < s.x + s.w && ny + r > s.y && ny - r < s.y + s.h) {
+                    return true;
+                }
+            }
+
+            // Tabrakan dengan air mancur / bangku
+            for (const obs of mallObstacles) {
+                if (nx + r > obs.x && nx - r < obs.x + obs.w && ny + r > obs.y && ny - r < obs.y + obs.h) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function updateMallSimulation() {
+            if (!document.getElementById('screen-mall').classList.contains('active')) return;
+            if (document.getElementById('shopModal').classList.contains('open')) return;
+
+            let dx = 0, dy = 0;
+            if (keysPressed.ArrowUp) { dy -= 1; playerMall.dir = 'up'; }
+            if (keysPressed.ArrowDown) { dy += 1; playerMall.dir = 'down'; }
+            if (keysPressed.ArrowLeft) { dx -= 1; playerMall.dir = 'left'; }
+            if (keysPressed.ArrowRight) { dx += 1; playerMall.dir = 'right'; }
+
+            if (dx !== 0 || dy !== 0) {
+                const len = Math.hypot(dx, dy);
+                dx = (dx / len) * playerMall.speed;
+                dy = (dy / len) * playerMall.speed;
+
+                if (!checkMallCollision(playerMall.x + dx, playerMall.y)) playerMall.x += dx;
+                if (!checkMallCollision(playerMall.x, playerMall.y + dy)) playerMall.y += dy;
+
+                playerMall.moving = true;
+                playerMall.walkFrame += 0.22;
+            } else {
+                playerMall.moving = false;
+                playerMall.walkFrame = 0;
+            }
+
+            // Cek kedekatan dengan pintu toko
+            nearbyShop = null;
+            for (const s of mallShops) {
+                const dist = Math.hypot(playerMall.x - s.doorX, playerMall.y - s.doorY);
+                if (dist < 46) {
+                    nearbyShop = s;
+                    break;
+                }
+            }
+
+            const overlay = document.getElementById('mallInteractOverlay');
+            const btn = document.getElementById('mallInteractBtn');
+            if (nearbyShop) {
+                overlay.style.display = 'block';
+                const isDone = GameState.mallCompletedShops.has(nearbyShop.id);
+                btn.textContent = `${nearbyShop.icon} ${isDone ? 'ULANGI' : 'KUNJUNGI'} ${nearbyShop.name}`;
+            } else {
+                overlay.style.display = 'none';
+            }
+        }
+
+        function drawMallWorld() {
+            const canvas = document.getElementById('mallCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            // 1. Lantai Keramik Pastel Mall
+            ctx.fillStyle = '#FFFDE7';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Pola ubin lantai
+            ctx.strokeStyle = '#F0E68C';
+            ctx.lineWidth = 1;
+            for (let gx = 0; gx < canvas.width; gx += 40) {
+                ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, canvas.height); ctx.stroke();
+            }
+            for (let gy = 0; gy < canvas.height; gy += 40) {
+                ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(canvas.width, gy); ctx.stroke();
+            }
+
+            // Karpet jalan utama mall
+            ctx.fillStyle = '#E1F5FE';
+            ctx.fillRect(30, 185, 800, 170);
+            ctx.strokeStyle = '#81D4FA';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(30, 185, 800, 170);
+
+            // 2. Dekorasi Tanaman Sudut
+            const plants = [[35, 35], [825, 35], [35, 505], [825, 505], [295, 95], [565, 95], [295, 445], [565, 445]];
+            plants.forEach(([px, py]) => {
+                ctx.fillStyle = '#8D6E63';
+                ctx.beginPath(); ctx.arc(px, py, 12, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = '#66BB6A';
+                ctx.beginPath(); ctx.arc(px - 4, py - 3, 9, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = '#81C784';
+                ctx.beginPath(); ctx.arc(px + 4, py - 2, 8, 0, Math.PI * 2); ctx.fill();
+            });
+
+            // 3. Air Mancur Tengah & Bangku Mall
+            mallObstacles.forEach(obs => {
+                if (obs.type === 'fountain') {
+                    ctx.fillStyle = '#B3E5FC';
+                    ctx.strokeStyle = '#0288D1';
+                    ctx.lineWidth = 4;
+                    ctx.beginPath();
+                    ctx.roundRect(obs.x, obs.y, obs.w, obs.h, 24);
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.fillStyle = '#0288D1';
+                    ctx.font = 'bold 13px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('⛲ AIR MANCUR', obs.x + obs.w / 2, obs.y + 33);
+                } else {
+                    ctx.fillStyle = '#D7CCC8';
+                    ctx.strokeStyle = '#6D4C41';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.roundRect(obs.x, obs.y, obs.w, obs.h, 8);
+                    ctx.fill();
+                    ctx.stroke();
+                }
+            });
+
+            // 4. Gambar 6 Toko Berwarna-warni
+            mallShops.forEach(s => {
+                const isDone = GameState.mallCompletedShops.has(s.id);
+
+                // Bayangan bangunan
+                ctx.fillStyle = 'rgba(0,0,0,0.08)';
+                ctx.fillRect(s.x + 6, s.y + 6, s.w, s.h);
+
+                // Badan Toko
+                ctx.fillStyle = s.color;
+                ctx.strokeStyle = s.roof;
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.roundRect(s.x, s.y, s.w, s.h, 14);
+                ctx.fill();
+                ctx.stroke();
+
+                // Atap Bergaris
+                ctx.fillStyle = s.roof;
+                ctx.beginPath();
+                ctx.roundRect(s.x - 4, s.y - 4, s.w + 8, 34, 12);
+                ctx.fill();
+
+                // Papan Nama Toko
+                ctx.fillStyle = '#FFFFFF';
+                ctx.font = 'bold 14px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(`${s.icon} ${s.name}`, s.x + s.w / 2, s.y + 18);
+
+                // Jendela & Status Selesai
+                ctx.fillStyle = 'rgba(255,255,255,0.75)';
+                ctx.fillRect(s.x + 18, s.y + 44, 65, 42);
+                ctx.fillRect(s.x + s.w - 83, s.y + 44, 65, 42);
+
+                ctx.font = '26px sans-serif';
+                ctx.fillText(s.icon, s.x + 50, s.y + 74);
+                ctx.fillText(isDone ? '✅' : '❓', s.x + s.w - 50, s.y + 74);
+
+                // Zona Pintu Interaksi (Lingkaran Berdenyut di Lantai)
+                ctx.fillStyle = isDone ? 'rgba(76, 175, 80, 0.25)' : 'rgba(255, 64, 129, 0.25)';
+                ctx.beginPath();
+                ctx.arc(s.doorX, s.doorY, 22, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = isDone ? '#2E7D32' : '#F50057';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            });
+
+            // 5. Gambar Karakter Pemain (Detektif Cilik Top-Down Lucu)
+            const bob = playerMall.moving ? Math.sin(playerMall.walkFrame) * 3 : 0;
+            const px = playerMall.x;
+            const py = playerMall.y + bob;
+
+            // Bayangan kaki
+            ctx.fillStyle = 'rgba(0,0,0,0.18)';
+            ctx.beginPath();
+            ctx.ellipse(playerMall.x, playerMall.y + 16, 14, 6, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Badan (Seragam Merah Putih)
+            ctx.fillStyle = '#FF5252';
+            ctx.beginPath();
+            ctx.arc(px, py + 6, 14, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Kepala
+            ctx.fillStyle = '#FFCCBC';
+            ctx.beginPath();
+            ctx.arc(px, py - 6, 13, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Topi Detektif Cokelat
+            ctx.fillStyle = '#8D6E63';
+            ctx.beginPath();
+            ctx.ellipse(px, py - 12, 16, 6, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(px, py - 14, 10, Math.PI, 0);
+            ctx.fill();
+
+            // Mata
+            ctx.fillStyle = '#212121';
+            ctx.beginPath();
+            ctx.arc(px - 4, py - 5, 2, 0, Math.PI * 2);
+            ctx.arc(px + 4, py - 5, 2, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function mallGameLoop() {
+            updateMallSimulation();
+            drawMallWorld();
+            requestAnimationFrame(mallGameLoop);
+        }
+
+        function openCurrentShopChallenge() {
+            if (!nearbyShop) return;
+            AudioEngine.playClick();
+            activeShop = nearbyShop;
+            activeShopQIdx = 0;
+            renderShopQuestion();
+            openModal('shopModal');
+        }
+
+        function renderShopQuestion() {
+            const qObj = activeShop.questions[activeShopQIdx];
+            document.getElementById('shopModalBadge').textContent = `${activeShop.icon} ${activeShop.name}`;
+            document.getElementById('shopModalTitle').textContent = `Tantangan di ${activeShop.name}`;
+            document.getElementById('shopModalStep').textContent = `Tantangan ${activeShopQIdx + 1} dari ${activeShop.questions.length}`;
+            document.getElementById('shopQuestionText').textContent = qObj.q;
+
+            const fb = document.getElementById('shopFeedback');
+            fb.className = 'feedback-banner';
+            fb.style.display = 'none';
+            document.getElementById('shopNextBtn').style.display = 'none';
+
+            const grid = document.getElementById('shopOptionsGrid');
+            grid.innerHTML = '';
+            qObj.opts.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = opt;
+                btn.onclick = () => {
+                    if (idx === qObj.ans) {
+                        btn.classList.add('correct');
+                        grid.querySelectorAll('button').forEach(b => b.disabled = true);
+                        fb.className = 'feedback-banner success';
+                        fb.innerHTML = `🌟 <strong>HOREEEEE! KAMU HEBAT!</strong><br>${qObj.exp}`;
+                        fb.style.display = 'block';
+                        document.getElementById('shopNextBtn').style.display = 'inline-flex';
+                        AudioEngine.playCorrectFeedback();
+                        triggerStarBurst();
+                    } else {
+                        btn.classList.add('wrong');
+                        setTimeout(() => btn.classList.remove('wrong'), 450);
+                        fb.className = 'feedback-banner retry';
+                        fb.innerHTML = `💪 <strong>COBAAA LAGI! KAMU PASTI BISA!</strong>`;
+                        fb.style.display = 'block';
+                        AudioEngine.playWrongFeedback();
+                    }
+                };
+                grid.appendChild(btn);
+            });
+        }
+
+        function nextShopQuestion() {
+            AudioEngine.playClick();
+            if (activeShopQIdx < activeShop.questions.length - 1) {
+                activeShopQIdx++;
+                renderShopQuestion();
+            } else {
+                const wasNew = !GameState.mallCompletedShops.has(activeShop.id);
+                GameState.mallCompletedShops.add(activeShop.id);
+                if (wasNew) {
+                    addRewards(3, 25);
+                }
+                renderMallShopChips();
+                closeModal('shopModal');
+
+                if (GameState.mallCompletedShops.size === mallShops.length) {
+                    AudioEngine.playApplauseAndWin();
+                    launchConfetti(65);
+                    setTimeout(() => {
+                        const fb = document.getElementById('shopFeedback');
+                        document.getElementById('shopModalBadge').textContent = '🎉 MALL SELESAI!';
+                        document.getElementById('shopModalTitle').textContent = 'SELAMAT! KAMU BERHASIL MENJELAJAHI HAPPY PHONOLOGY MALL!';
+                        document.getElementById('shopModalStep').textContent = 'Semua 6 Toko Berhasil Ditaklukkan!';
+                        document.getElementById('shopQuestionText').textContent = 'Kamu mendapatkan bonus +5 Bintang dan +50 Koin Emas!';
+                        document.getElementById('shopOptionsGrid').innerHTML = '';
+                        fb.style.display = 'none';
+                        document.getElementById('shopNextBtn').style.display = 'none';
+                        addRewards(5, 50);
+                        openModal('shopModal');
+                    }, 300);
+                }
+            }
+        }
+
+        /* ==========================================================================
+           F. GAME 3: PUZZLE DUNIA KATA (10 KATA + ILUSTRASI SVG + KUIS FONOLOGI)
+           ========================================================================== */
+        const puzzleWordsData = [
+            {
+                word: "PAKU", label: "🔨 PAKU",
+                svg: `<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="300" height="300" fill="#FFF9C4"/>
+                        <circle cx="150" cy="150" r="115" fill="#FFE082"/>
+                        <rect x="105" y="55" width="90" height="22" rx="8" fill="#78909C" stroke="#37474F" stroke-width="5"/>
+                        <polygon points="136,77 164,77 160,215 150,250 140,215" fill="#B0BEC5" stroke="#37474F" stroke-width="5"/>
+                        <line x1="145" y1="88" x2="145" y2="205" stroke="#ECEFF1" stroke-width="4" stroke-linecap="round"/>
+                      </svg>`,
+                questions: [
+                    { q: "Apa fonem awal kata PAKU?", opts: ["A. /p/", "B. /a/", "C. /u/"], ans: 0, exp: "Benar! Kata PAKU diawali fonem /p/." },
+                    { q: "Apa fonem akhir kata PAKU?", opts: ["A. /k/", "B. /u/", "C. /a/"], ans: 1, exp: "Tepat! Kata PAKU diakhiri fonem vokal /u/." },
+                    { q: "Berapa jumlah fonem kata PAKU?", opts: ["A. 3 fonem", "B. 4 fonem", "C. 5 fonem"], ans: 1, exp: "Hebat! PAKU memiliki 4 fonem: /p/-/a/-/k/-/u/." },
+                    { q: "Berapa jumlah suku kata kata PAKU?", opts: ["A. 2 suku kata (PA - KU)", "B. 3 suku kata", "C. 4 suku kata"], ans: 0, exp: "Pintar! PA - KU terdiri dari 2 suku kata." }
+                ]
+            },
+            {
+                word: "BOLA", label: "⚽ BOLA",
+                svg: `<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="300" height="300" fill="#E1F5FE"/>
+                        <circle cx="150" cy="150" r="105" fill="#FFFFFF" stroke="#0288D1" stroke-width="8"/>
+                        <polygon points="150,105 185,130 172,172 128,172 115,130" fill="#263238"/>
+                        <polygon points="150,45 175,70 150,90 125,70" fill="#263238"/>
+                        <polygon points="65,125 95,120 102,150 75,165" fill="#263238"/>
+                        <polygon points="235,125 205,120 198,150 225,165" fill="#263238"/>
+                      </svg>`,
+                questions: [
+                    { q: "Apa fonem awal kata BOLA?", opts: ["A. /b/", "B. /o/", "C. /l/"], ans: 0, exp: "Benar! Fonem awal kata BOLA adalah /b/." },
+                    { q: "Apa fonem akhir kata BOLA?", opts: ["A. /l/", "B. /o/", "C. /a/"], ans: 2, exp: "Tepat! Fonem akhir kata BOLA adalah /a/." },
+                    { q: "Berapa jumlah fonem kata BOLA?", opts: ["A. 2 fonem", "B. 4 fonem", "C. 5 fonem"], ans: 1, exp: "Hebat! /b/-/o/-/l/-/a/ berjumlah 4 fonem." },
+                    { q: "Apa saja fonem vokal dalam kata BOLA?", opts: ["A. /o/ dan /a/", "B. /b/ dan /l/", "C. /i/ dan /u/"], ans: 0, exp: "Sempurna! Fonem vokal dalam BOLA adalah /o/ dan /a/." }
+                ]
+            },
+            {
+                word: "BUKU", label: "📘 BUKU",
+                svg: `<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="300" height="300" fill="#F3E5F5"/>
+                        <rect x="65" y="55" width="170" height="190" rx="16" fill="#4FC3F7" stroke="#01579B" stroke-width="6"/>
+                        <rect x="65" y="55" width="28" height="190" rx="8" fill="#0288D1"/>
+                        <rect x="112" y="88" width="95" height="45" rx="10" fill="#FFF9C4"/>
+                        <text x="160" y="117" text-anchor="middle" font-size="22" font-weight="bold" fill="#E65100">BUKU</text>
+                      </svg>`,
+                questions: [
+                    { q: "Apa fonem awal kata BUKU?", opts: ["A. /b/", "B. /u/", "C. /k/"], ans: 0, exp: "Benar! Fonem awalnya adalah /b/." },
+                    { q: "Berapa jumlah fonem dalam kata BUKU?", opts: ["A. 3 fonem", "B. 4 fonem", "C. 5 fonem"], ans: 1, exp: "Tepat! /b/-/u/-/k/-/u/ berjumlah 4 fonem." }
+                ]
+            },
+            {
+                word: "MEJA", label: "🪑 MEJA",
+                svg: `<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="300" height="300" fill="#E8F5E9"/>
+                        <rect x="45" y="105" width="210" height="28" rx="10" fill="#FFB74D" stroke="#E65100" stroke-width="5"/>
+                        <rect x="70" y="133" width="20" height="110" rx="6" fill="#8D6E63"/>
+                        <rect x="210" y="133" width="20" height="110" rx="6" fill="#8D6E63"/>
+                      </svg>`,
+                questions: [
+                    { q: "Apa fonem awal kata MEJA?", opts: ["A. /m/", "B. /e/", "C. /j/"], ans: 0, exp: "Benar! Kata MEJA diawali fonem /m/." },
+                    { q: "Apa saja fonem konsonan pada kata MEJA?", opts: ["A. /m/ dan /j/", "B. /e/ dan /a/", "C. /m/ dan /a/"], ans: 0, exp: "Tepat! Fonem konsonannya adalah /m/ dan /j/." }
+                ]
+            },
+            {
+                word: "TOPI", label: "🎩 TOPI",
+                svg: `<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="300" height="300" fill="#FCE4EC"/>
+                        <ellipse cx="150" cy="195" rx="115" ry="26" fill="#FF80AB" stroke="#AD1457" stroke-width="5"/>
+                        <path d="M75,195 Q80,95 150,95 Q220,95 225,195 Z" fill="#F48FB1" stroke="#AD1457" stroke-width="5"/>
+                        <rect x="78" y="162" width="144" height="18" fill="#FFD54F"/>
+                      </svg>`,
+                questions: [
+                    { q: "Apa fonem akhir kata TOPI?", opts: ["A. /p/", "B. /o/", "C. /i/"], ans: 2, exp: "Benar! Fonem akhir kata TOPI adalah /i/." },
+                    { q: "Pasangan minimal dari kata TOPI adalah...", opts: ["A. KOPI", "B. BUKU", "C. MEJA"], ans: 0, exp: "Hebat! TOPI dan KOPI berbeda tepat satu fonem (/t/ dan /k/)." }
+                ]
+            },
+            {
+                word: "KAKI", label: "🦶 KAKI",
+                svg: `<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="300" height="300" fill="#FFFDE7"/>
+                        <path d="M120,60 L165,60 L165,175 Q225,180 230,215 Q230,238 145,238 Q115,238 115,205 Z" fill="#FFCCBC" stroke="#D84315" stroke-width="6"/>
+                      </svg>`,
+                questions: [
+                    { q: "Berapa jumlah fonem pada kata KAKI?", opts: ["A. 4 fonem", "B. 3 fonem", "C. 5 fonem"], ans: 0, exp: "Tepat! /k/-/a/-/k/-/i/ terdiri dari 4 fonem." },
+                    { q: "Apa fonem awal kata KAKI?", opts: ["A. /k/", "B. /a/", "C. /i/"], ans: 0, exp: "Benar! Fonem awalnya adalah /k/." }
+                ]
+            },
+            {
+                word: "SAPI", label: "🐄 SAPI",
+                svg: `<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="300" height="300" fill="#E8F5E9"/>
+                        <circle cx="150" cy="145" r="78" fill="#FFFFFF" stroke="#37474F" stroke-width="6"/>
+                        <circle cx="122" cy="125" r="18" fill="#37474F"/>
+                        <ellipse cx="150" cy="175" rx="46" ry="30" fill="#FFAB91"/>
+                        <circle cx="125" cy="130" r="6" fill="#000"/>
+                        <circle cx="175" cy="130" r="6" fill="#000"/>
+                      </svg>`,
+                questions: [
+                    { q: "Apa fonem awal kata SAPI?", opts: ["A. /s/", "B. /a/", "C. /p/"], ans: 0, exp: "Pintar! Kata SAPI diawali oleh fonem /s/." },
+                    { q: "Berapa jumlah suku kata pada kata SAPI?", opts: ["A. 2 suku kata (SA - PI)", "B. 3 suku kata", "C. 4 suku kata"], ans: 0, exp: "Benar! SA - PI terdiri dari 2 suku kata." }
+                ]
+            },
+            {
+                word: "GIGI", label: "🦷 GIGI",
+                svg: `<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="300" height="300" fill="#E0F7FA"/>
+                        <path d="M90,95 Q115,65 150,85 Q185,65 210,95 Q225,150 195,225 Q175,235 165,180 Q150,165 135,180 Q125,235 105,225 Q75,150 90,95 Z" fill="#FFFFFF" stroke="#0288D1" stroke-width="6"/>
+                      </svg>`,
+                questions: [
+                    { q: "Apa fonem awal kata GIGI?", opts: ["A. /g/", "B. /i/", "C. /k/"], ans: 0, exp: "Tepat! Fonem awal kata GIGI adalah /g/." },
+                    { q: "Apa fonem vokal pada kata GIGI?", opts: ["A. /i/", "B. /g/", "C. /a/"], ans: 0, exp: "Benar! Fonem vokal yang menyusun kata GIGI adalah /i/." }
+                ]
+            },
+            {
+                word: "PITA", label: "🎀 PITA",
+                svg: `<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="300" height="300" fill="#FCE4EC"/>
+                        <polygon points="150,150 65,90 65,210" fill="#FF80AB" stroke="#C2185B" stroke-width="6"/>
+                        <polygon points="150,150 235,90 235,210" fill="#FF80AB" stroke="#C2185B" stroke-width="6"/>
+                        <circle cx="150" cy="150" r="24" fill="#FFD54F" stroke="#C2185B" stroke-width="5"/>
+                      </svg>`,
+                questions: [
+                    { q: "Apa fonem awal kata PITA?", opts: ["A. /p/", "B. /i/", "C. /t/"], ans: 0, exp: "Hebat! Kata PITA diawali oleh fonem /p/." },
+                    { q: "Berapa jumlah fonem dalam kata PITA?", opts: ["A. 4 fonem", "B. 3 fonem", "C. 5 fonem"], ans: 0, exp: "Benar! /p/-/i/-/t/-/a/ berjumlah 4 fonem." }
+                ]
+            },
+            {
+                word: "KUDA", label: "🐴 KUDA",
+                svg: `<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="300" height="300" fill="#FFF3E0"/>
+                        <path d="M110,235 L110,120 Q115,65 170,75 L215,125 Q220,150 185,155 L165,150 L165,235 Z" fill="#A1887F" stroke="#4E342E" stroke-width="6"/>
+                        <circle cx="158" cy="105" r="6" fill="#212121"/>
+                      </svg>`,
+                questions: [
+                    { q: "Apa fonem awal kata KUDA?", opts: ["A. /k/", "B. /u/", "C. /d/"], ans: 0, exp: "Tepat! Fonem awal kata KUDA adalah /k/." },
+                    { q: "Apa saja fonem vokal pada kata KUDA?", opts: ["A. /u/ dan /a/", "B. /k/ dan /d/", "C. /i/ dan /o/"], ans: 0, exp: "Luar biasa! Fonem vokal pada KUDA adalah /u/ dan /a/." }
+                ]
+            }
+        ];
+
+        let puzzleOrder = [];
+        let selectedPiecePos = null;
+        let puzzleSolvedState = false;
+        let activePuzzleQIdx = 0;
+
+        function populatePuzzleSelector() {
+            const sel = document.getElementById('puzzleWordSelect');
+            sel.innerHTML = '';
+            puzzleWordsData.forEach((item, idx) => {
+                const opt = document.createElement('option');
+                opt.value = idx;
+                opt.textContent = `${item.label} ${GameState.puzzleCompletedWords.has(item.word) ? '✅' : ''}`;
+                sel.appendChild(opt);
+            });
+        }
+
+        function getPuzzleGridDimensions() {
+            const diff = document.getElementById('puzzleDifficultySelect').value;
+            if (diff === '2') return { cols: 2, rows: 2 };
+            if (diff === '3-2') return { cols: 3, rows: 2 };
+            return { cols: 3, rows: 3 };
+        }
+
+        function initPuzzleGame() {
+            const wordIdx = parseInt(document.getElementById('puzzleWordSelect').value || '0', 10);
+            const wordObj = puzzleWordsData[wordIdx];
+            document.getElementById('puzzleCurrentWordLabel').textContent = wordObj.word;
+
+            const { cols, rows } = getPuzzleGridDimensions();
+            const total = cols * rows;
+            puzzleOrder = Array.from({ length: total }, (_, i) => i);
+
+            // Acak potongan gambar (pastikan tidak langsung tersusun rapi)
+            do {
+                for (let i = puzzleOrder.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [puzzleOrder[i], puzzleOrder[j]] = [puzzleOrder[j], puzzleOrder[i]];
+                }
+            } while (puzzleOrder.every((val, idx) => val === idx));
+
+            selectedPiecePos = null;
+            puzzleSolvedState = false;
+            document.getElementById('puzzleChallengeBox').style.display = 'none';
+            renderPuzzleBoard();
+        }
+
+        function renderPuzzleBoard() {
+            const wordIdx = parseInt(document.getElementById('puzzleWordSelect').value || '0', 10);
+            const wordObj = puzzleWordsData[wordIdx];
+            const { cols, rows } = getPuzzleGridDimensions();
+            const board = document.getElementById('puzzleBoard');
+
+            board.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+            board.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+            board.innerHTML = '';
+
+            puzzleOrder.forEach((pieceIdx, boardPos) => {
+                const piece = document.createElement('div');
+                piece.className = 'puzzle-piece' +
+                    (selectedPiecePos === boardPos ? ' selected' : '') +
+                    (puzzleSolvedState ? ' solved-piece' : '');
+
+                const origCol = pieceIdx % cols;
+                const origRow = Math.floor(pieceIdx / cols);
+
+                // Render potongan ilustrasi SVG sesuai koordinat baris & kolom
+                const inner = document.createElement('div');
+                inner.style.position = 'absolute';
+                inner.style.width = `${cols * 100}%`;
+                inner.style.height = `${rows * 100}%`;
+                inner.style.left = `-${origCol * 100}%`;
+                inner.style.top = `-${origRow * 100}%`;
+                inner.style.pointerEvents = 'none';
+                inner.innerHTML = wordObj.svg;
+
+                piece.appendChild(inner);
+                piece.onclick = () => handlePuzzlePieceClick(boardPos);
+                board.appendChild(piece);
+            });
+        }
+
+        function handlePuzzlePieceClick(boardPos) {
+            if (puzzleSolvedState) return;
+            AudioEngine.playClick();
+
+            if (selectedPiecePos === null) {
+                selectedPiecePos = boardPos;
+                renderPuzzleBoard();
+            } else if (selectedPiecePos === boardPos) {
+                selectedPiecePos = null;
+                renderPuzzleBoard();
+            } else {
+                // Tukar posisi dua potongan
+                [puzzleOrder[selectedPiecePos], puzzleOrder[boardPos]] = [puzzleOrder[boardPos], puzzleOrder[selectedPiecePos]];
+                selectedPiecePos = null;
+                renderPuzzleBoard();
+                checkPuzzleCompleted();
+            }
+        }
+
+        function checkPuzzleCompleted() {
+            const isComplete = puzzleOrder.every((val, idx) => val === idx);
+            if (isComplete) {
+                puzzleSolvedState = true;
+                renderPuzzleBoard();
+                AudioEngine.playCorrectFeedback();
+                triggerStarBurst();
+
+                activePuzzleQIdx = 0;
+                document.getElementById('puzzleChallengeBox').style.display = 'block';
+                renderPuzzleQuestion();
+            }
+        }
+
+        function renderPuzzleQuestion() {
+            const wordIdx = parseInt(document.getElementById('puzzleWordSelect').value || '0', 10);
+            const wordObj = puzzleWordsData[wordIdx];
+            const qObj = wordObj.questions[activePuzzleQIdx];
+
+            document.getElementById('puzzleChallengeProgress').textContent =
+                `Tantangan Kata ${wordObj.word} (${activePuzzleQIdx + 1} dari ${wordObj.questions.length})`;
+            document.getElementById('puzzleQuestionText').textContent = qObj.q;
+
+            const fb = document.getElementById('puzzleFeedback');
+            fb.className = 'feedback-banner';
+            fb.style.display = 'none';
+
+            const grid = document.getElementById('puzzleOptionsGrid');
+            grid.innerHTML = '';
+            qObj.opts.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = opt;
+                btn.onclick = () => {
+                    if (idx === qObj.ans) {
+                        btn.classList.add('correct');
+                        grid.querySelectorAll('button').forEach(b => b.disabled = true);
+                        fb.className = 'feedback-banner success';
+                        fb.innerHTML = `🌟 <strong>HOREEEEE! KAMU HEBAT!</strong><br>${qObj.exp}`;
+                        fb.style.display = 'block';
+                        AudioEngine.playCorrectFeedback();
+                        triggerStarBurst();
+
+                        setTimeout(() => {
+                            if (activePuzzleQIdx < wordObj.questions.length - 1) {
+                                activePuzzleQIdx++;
+                                renderPuzzleQuestion();
+                            } else {
+                                const isNew = !GameState.puzzleCompletedWords.has(wordObj.word);
+                                GameState.puzzleCompletedWords.add(wordObj.word);
+                                if (isNew) addRewards(3, 15);
+                                populatePuzzleSelector();
+                                document.getElementById('puzzleWordSelect').value = wordIdx;
+                                AudioEngine.playApplauseAndWin();
+                                launchConfetti(45);
+                                fb.innerHTML = `🏆 <strong>SELAMAT!</strong> Puzzle & Tantangan Kata <strong>${wordObj.word}</strong> Selesai! Pilih kata berikutnya di atas!`;
+                            }
+                        }, 1300);
+                    } else {
+                        btn.classList.add('wrong');
+                        setTimeout(() => btn.classList.remove('wrong'), 450);
+                        fb.className = 'feedback-banner retry';
+                        fb.innerHTML = `💪 <strong>COBAAA LAGI! KAMU PASTI BISA!</strong>`;
+                        fb.style.display = 'block';
+                        AudioEngine.playWrongFeedback();
+                    }
+                };
+                grid.appendChild(btn);
+            });
+        }
+
+        function resetAllProgress() {
+            AudioEngine.playClick();
+            GameState.stars = 0;
+            GameState.coins = 0;
+            GameState.detectiveSolved.clear();
+            GameState.mallCompletedShops.clear();
+            GameState.puzzleCompletedWords.clear();
+            currentDetIdx = 0;
+            renderDetectiveQuestion();
+            renderMallShopChips();
+            populatePuzzleSelector();
+            initPuzzleGame();
+            updateAllHUD();
+        }
+
+        /* ==========================================================================
+           G. INISIALISASI SAAT HALAMAN SELESAI DIMUAT
+           ========================================================================== */
+        window.onload = function () {
+            renderDetectiveQuestion();
+            setupMallControls();
+            renderMallShopChips();
+            mallGameLoop();
+            populatePuzzleSelector();
+            initPuzzleGame();
+            updateAllHUD();
+        };
+    </script>
+</body>
+</html>
